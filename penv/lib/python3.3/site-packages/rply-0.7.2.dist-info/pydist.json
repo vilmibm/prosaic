@@ -1,0 +1,1 @@
+{"document_names": {"description": "DESCRIPTION.rst"}, "name": "rply", "metadata_version": "2.0", "contacts": [{"role": "author", "email": "alex.gaynor@gmail.com", "name": "Alex Gaynor"}], "generator": "bdist_wheel (0.22.0)", "summary": "A pure Python Lex/Yacc that works with RPython", "version": "0.7.2"}
