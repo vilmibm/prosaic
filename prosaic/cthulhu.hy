@@ -7,6 +7,8 @@
 (import [random [randint]])
 (import sys)
 
+(import [nltk-util [word->stem]])
+
 ; # General Utility
 (defn random-nth [l] (nth l (randint 0 (dec (len l)))))
 (defn prepend [l item] (+ l [item]))
@@ -26,7 +28,7 @@
                     (map (fn [r] (.to-query r)))
                     (reduce merge)))]
    [weaken! (fn [self]
-              (weaken! (rand-nth (. self rules))))]])
+              (weaken! (random-nth (. self rules))))]])
 
 (defclass rule []
   [[strength 0]
@@ -46,7 +48,7 @@
    [[to-query (fn [self]
                (if (= 0 (. self strength))
                   (.to-query (super))
-                  (let [[syllables (. self syllables)
+                  (let [[syllables (. self syllables)]
                         [modifier  (- syllables (. self strength))]
                         [lte       (+ syllables modifier)]
                         [gte       (- syllables modifier)]]
@@ -60,11 +62,32 @@
 
 (defclass keyword-rule [rule]
   [[strength 11]
+   [max-strength 11]
+   [phrase-cache []]
+   [where-clause-tmpl "Math.abs({} - this.line_no) <= {}"]
+
+   [__init__ (fn [self keyword db]
+               (setv (. self keyword) (word->stem keyword))
+               (.prime-cache! self db)
+               nil)]
+
+   [prime-cache! (fn [self db]
+                   (setv (. self phrase-cache)
+                         (list (.find db {"stems" (. self keyword)})))
+                   (if (empty? (. self phrase-cache))
+                     (setv (. self strength) 0)))]
+
    [to-query (fn [self]
                (if (= 0 (. self strength))
                  (.to-query (super))
-                 (let [[str (. self strength)]]
-                   (cond [(= str 11) {}]))))]])
+                 (let [[phrase      (random-nth (. self phrase-cache))]
+                       [ok-distance (- (. self max-strength)
+                                       (. self strength))]
+                       [line-no     (. phrase ["line_no"])]]
+                   {"source" (. phrase ["source"])
+                    "$where" (.format (. self where-clause-tmpl)
+                                      line-no
+                                      ok-distance)})))]])
 
 ; # Working with Rulesets
 (defn ruleset->query [ruleset] "todo")
