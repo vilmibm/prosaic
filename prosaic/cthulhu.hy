@@ -89,6 +89,21 @@
                                       line-no
                                       ok-distance)})))]])
 
+(defclass fuzzy-keyword-rule [keyword-rule]
+  [[to-query (fn [self]
+               (if (= 0 (. self strength))
+                 (.to-query (super))
+                 (let [[phrase      (random-nth (. self phrase-cache))]
+                       [ok-distance (inc (- (. self max-strength)
+                                            (. self strength)))]
+                       [line-no     (. phrase ["line_no"])]]
+                   {"source" (. phrase ["source"])
+                    "line_no" {"$ne" line-no}
+                    "$where" (.format (. self where-clause-tmpl)
+                                      line-no
+                                      ok-distance)})))]])
+
+
 ; # Working with Rulesets
 (defn ruleset->query [ruleset] "todo")
 (defn weaken-ruleset [ruleset] "todo")
