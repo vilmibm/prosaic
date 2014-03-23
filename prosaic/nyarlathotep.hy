@@ -112,15 +112,17 @@
             (recur (rest t-s) (+ new (split-multiclause (first t-s))))))))
 
 (defn process-sentence [tagged-sen source line-no]
-  {:stems         (sentence->stems tagged-sen)
-   :tagged        tagged-sen
-   :rhyme-sound   (rhyme-sound tagged-sen)
-   :phonemes      (->> tagged-sen
+  {"stems"         (sentence->stems tagged-sen)
+   "source"        source
+   "tagged"        tagged-sen
+   "rhyme_sound"   (rhyme-sound tagged-sen)
+   "phonemes"      (->> tagged-sen
                       (map first)
                       (map word->phonemes)
                       list)
-   :num-syllables (count-syllables tagged-sen)
-   :raw           (tagged->str tagged-sen)})
+   "num_syllables" (count-syllables tagged-sen)
+   "line_no"       line-no
+   "raw"           (tagged->str tagged-sen)})
 
 ;; # Main entry point for text processing
 (defn process-txt! [raw-text source db]
