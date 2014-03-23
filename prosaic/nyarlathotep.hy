@@ -6,20 +6,19 @@
 
 (import nltk)
 (import [nltk.chunk :as chunk])
-(import [nltk.stem.snowball [EnglishStemmer]])
 (import [nltk.corpus [cmudict]])
+
+(import [nltk-util [word->stem]])
 
 
 ;; # General Utility Functions
 (defn invert [f] (fn [&rest args] (not (apply f args))))
-(defn plus [&rest args] (reduce (fn [x y] (+ x y))) args)
 (defn match [regex str] (bool (.match regex str)))
-(defn plus [x y] (+ x y))
+(defn plus [x y] (+ x y)) ;; 2-arity for reducing
 (defn comp [f g] (fn [&rest args] (f (apply g args))))
 
 ;; # NLTK Helpers
 (def sd (nltk.data.load "tokenizers/punkt/english.pickle"))
-(def stemmer (EnglishStemmer))
 (def cmudict-dict (.dict cmudict))
 (def vowel-pho-re (.compile re "AA|AE|AH|AO|AW|AY|EH|EY|ER|IH|IY|OW|OY|UH|UW"))
 (def vowel-re (.compile re "[aeiouAEIOU]"))
@@ -44,7 +43,6 @@
                               (.pos-tag nltk)))
 
 (defn word->chars [word] (list word))
-(defn word->stem [word] (.stem stemmer word))
 (defn sentence->stems [tagged-sen]
   (->> tagged-sen
        (map (comp word->stem first))
