@@ -37,7 +37,7 @@
 
 ;; Datbase interaction
 (defn db-connect [dbname]
-  (. (MongoClient) [dbname] ["phrases"]))
+  (. (MongoClient) [dbname] phrases))
 
 ;; Driver code
 (defn dispatch [action args]
