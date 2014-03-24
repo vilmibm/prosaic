@@ -7,9 +7,14 @@
 (import [random [randint]])
 (import sys)
 
+(import [util [match]])
 (import [nltk-util [word->stem]])
 
 ; # General Utility
+(defn smatch [pat str]
+  (let [[wrapped-pat (+ ".*" pat ".*")]
+        [reg-pat (.compile re wrapped-pat)]]
+    (match reg-pat str)))
 (defn random-nth [l] (nth l (randint 0 (dec (len l)))))
 (defn prepend [l item] (+ l [item]))
 (defn merge [d0 d1]
@@ -102,6 +107,34 @@
                     "$where" (.format (. self where-clause-tmpl)
                                       line-no
                                       ok-distance)})))]])
+
+(defclass rhyme-rule [rule]
+  [[strength 3]
+   [__init__ (fn [self rhyme]
+               (setv (. self sound) rhyme)
+               nil)]
+   [next-sound (fn [self]
+                 (let [[str   (. self strength)]
+                       [sound (. self sound)]]
+                   (cond [(= 3 str) sound]
+                         [(= 2 str)
+                          (cond [(smatch "0" sound)
+                                 (.replace sound "0" "1")]
+                                [(smatch "1" sound)
+                                 (.replace sound "1" "2")]
+                                [(smatch "2" sound)
+                                 (.replace sound "2" "0")])]
+                         [(= 1 str)
+                          (cond [(smatch "0" sound)
+                                 (.replace sound "0" "2")]
+                                [(smatch "1" sound)
+                                 (.replace sound "1" "0")]
+                                [(smatch "2" sound)
+                                 (.replace sound "2" "1")])])))]
+   [to-query (fn [self]
+               (if (= 0 (. self strength))
+                 (.to-query (super))
+                   {"rhyme_sound" (.next-sound self)}))]])
 
 
 ; # Working with Rulesets
