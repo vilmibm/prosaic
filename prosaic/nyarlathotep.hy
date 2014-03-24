@@ -8,12 +8,12 @@
 (import [nltk.chunk :as chunk])
 (import [nltk.corpus [cmudict]])
 
+(import [util [match]])
 (import [nltk-util [word->stem]])
 
 
 ;; # General Utility Functions
 (defn invert [f] (fn [&rest args] (not (apply f args))))
-(defn match [regex str] (bool (.match regex str)))
 (defn plus [x y] (+ x y)) ;; 2-arity for reducing
 (defn comp [f g] (fn [&rest args] (f (apply g args))))
 
