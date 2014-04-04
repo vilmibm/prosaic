@@ -6,12 +6,7 @@ by [nathanielksmith](http://chiptheglasses.com)
 
 written in [hy](http://hylang.org)
 
-formerly written with
-[nodejs](https://github.com/nathanielksmith/node-prosaic)
+(formerly written with
+[nodejs](https://github.com/nathanielksmith/node-prosaic))
 
 and licensed under the [GPL](https://www.gnu.org/copyleft/gpl.html).
-
-
-(note: penv is a virtualenv with natively compiled components. it is
-not useful to you. it will be replaced by a setup.py/requirements.txt
-at some point).
