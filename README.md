@@ -1,4 +1,11 @@
-# prosaic
+                                   o
+           _   ,_    __   ,   __,      __
+         |/ \_/  |  /  \_/ \_/  |  |  /
+         |__/    |_/\__/  \/ \_/|_/|_/\___/
+        /|
+        \|
+
+## prosaic
 
 being a prose scraper & poetry generator
 
