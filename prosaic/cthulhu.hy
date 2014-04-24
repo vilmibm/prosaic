@@ -14,8 +14,9 @@
 ;   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (require hy.contrib.loop)
-;(require macro-util)
+(loop [[x nil]] x) ; this is here to fix a threading / sys.modules issue
 
+(import [concurrent.futures [ThreadPoolExecutor]])
 (import [copy [deepcopy]])
 (import [functools [partial reduce]])
 (import [json [loads]])
@@ -25,7 +26,6 @@
                 fuzzy-keyword-rule
                 rhyme-rule
                 syllable-count-rule]])
-(import [nltk-util [word->stem]])
 (import [util [random-nth]])
 
 ; # General Utility
@@ -36,6 +36,10 @@
     (.update d0-copy d1)
     d0-copy))
 
+(defn merge! [d0 d1]
+  (.update d0 d1)
+  d0)
+
 ; # Rules and Rulesets
 (defclass rule-set []
   [[rules []]
@@ -45,24 +49,29 @@
    [to-query (fn [self]
                (->> (. self rules)
                     (map (fn [r] (.to-query r)))
-                    (reduce merge)))]
+                    (reduce merge!)))]
    [weaken! (fn [self]
               (.weaken! (random-nth (. self rules)))
               self)]])
 
 (defn build-sound-cache [db]
+  (print "Building sound cache")
   (.distinct (.find db) "rhyme_sound"))
 
 (defn build-letters->sounds [db template &optional sound-cache]
-  (let [[letters (list (set (pluck template "rhyme")))]
-        [sounds  (if sound-cache
-                   sound-cache
-                   (build-sound-cache db))]]
+  (print "building letters->sound")
+  (let [[letters (list (set (pluck template "rhyme")))]]
+    (if (empty? letters)
+      {}
+      (let [[sounds  (if sound-cache
+                       sound-cache
+                       (build-sound-cache db))]]
         (->> letters
              (map (fn [l] [l (random-nth sounds)]))
-             dict)))
+             dict)))))
 
 (defn extract-rule [db l->s raw-pair]
+  (print "extracting a rule")
   (let [[type (first raw-pair)]
         [arg  (second raw-pair)]]
     (cond
@@ -73,26 +82,37 @@
 
 ;; need to transform dictionary -> list of rules
 (defn extract-ruleset [db letters->sounds tmpl-line]
+  (print "extracting a ruleset")
   (->> tmpl-line
        .items
        (map (partial extract-rule db letters->sounds))
        list
        rule-set))
 
-(defn template->rulesets [db template &optional sound-cache]
+(defn template->rulesets [db template executor &optional sound-cache]
+  (print "extracting rulesets")
   (let [[letters->sounds (build-letters->sounds
                           db template sound-cache)]]
-  (list (map (partial extract-ruleset db letters->sounds) template))))
+  (list (.map executor (partial extract-ruleset db letters->sounds) template))))
 
 (defn ruleset->line [db ruleset]
+  (print "start")
   (loop [[line nil] [r ruleset]]
-        (let [[query (.to-query r)]
-              [lines (list (.find db query))]]
+        (let [[query (do (print "making query") (.to-query r))]
+              [lines (do (print "start search") (list (.find db query)))]]
+          (print "found lines")
           (if (empty? lines)
             (recur nil (.weaken! ruleset))
-            (random-nth lines)))))
+            (do
+             (print "end")
+             (random-nth lines))))))
 
 ; # Main entry point
-(defn poem-from-template [template db]
-  (let [[rulesets (template->rulesets db template)]]
-    (list (map (partial ruleset->line db) rulesets))))
+(defn poem-from-template-async [template db &optional sound-cache]
+  (let [[executor (ThreadPoolExecutor 10)]
+        [rulesets (template->rulesets db template executor sound-cache)]
+        [poem-lines (list (.map executor
+                                (partial ruleset->line db)
+                                rulesets))]]
+    (.shutdown executor)
+    poem-lines))

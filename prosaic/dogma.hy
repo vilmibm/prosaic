@@ -1,17 +1,3 @@
-(import re)
-
-(import [nltk-util [word->stem]])
-(import [util [match random-nth]])
-
-;; # General Utility
-(defn smatch [pat str]
-  (let [[wrapped-pat (+ ".*" pat ".*")]
-        [reg-pat (.compile re wrapped-pat)]]
-    (match reg-pat str)))
-
-
-;; # Rules
-
 ;   This program is part of prosaic.
 
 ;   This program is free software: you can redistribute it and/or modify
@@ -26,7 +12,16 @@
 
 ;   You should have received a copy of the GNU General Public License
 ;   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+(import re)
 
+(import [nltk-util [word->stem]])
+(import [util [match random-nth]])
+
+;; # General Utility
+(defn smatch [pat str]
+  (let [[wrapped-pat (+ ".*" pat ".*")]
+        [reg-pat (.compile re wrapped-pat)]]
+    (match reg-pat str)))
 (defclass rule []
   [[strength 0]
    [weaken! (fn [self]
@@ -68,6 +63,7 @@
                nil)]
 
    [prime-cache! (fn [self db]
+                   (print "building phrase cache")
                    (setv (. self phrase-cache)
                          (list (.find db {"stems" (. self keyword)})))
                    (if (empty? (. self phrase-cache))
