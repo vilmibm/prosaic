@@ -1,6 +1,6 @@
 (import json)
 (import [time [time]])
-(import [cthulhu [poem-from-template-async build-sound-cache]])
+(import [cthulhu [poem-from-template-exp build-sound-cache]])
 (import [pymongo [MongoClient]])
 
 ;(def db (. (MongoClient) prosaic phrases))
@@ -43,9 +43,47 @@
                 "syllables" 5
                 "rhyme" "A"}])
 
+(def sonnet0 [{"rhyme" "A"
+              "syllables" 10
+              "keyword" "why"}
+             {"rhyme" "B"
+              "syllables" 10}
+             {"rhyme" "A"
+              "syllables" 10
+              "keyword" "is"}
+             {"rhyme" "B"
+              "syllables" 10}
+
+             {"rhyme" "C"
+              "syllables" 10
+              "keyword" "the"}
+             {"rhyme" "D"
+              "syllables" 10}
+             {"rhyme" "C"
+              "syllables" 10
+              "keyword" "sky"}
+             {"rhyme" "D"
+              "syllables" 10}
+
+             {"rhyme" "E"
+              "syllables" 10
+              "keyword" "blue"}
+             {"rhyme" "F"
+              "syllables" 10}
+             {"rhyme" "E"
+              "syllables" 10}
+             {"rhyme" "F"
+              "syllables" 10}
+
+             {"rhyme" "G"
+              "syllables" 10}
+             {"rhyme" "G"
+              "syllables" 10}])
+
+
 (print "Go!")
 (def start (time))
-(poem-from-template-async complex db sound-cache)
+(poem-from-template-exp sonnet0 db sound-cache)
 (def end (time))
 (print "Took " (- end start))
 

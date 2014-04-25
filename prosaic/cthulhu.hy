@@ -98,14 +98,26 @@
 (defn ruleset->line [db ruleset]
   (print "start")
   (loop [[line nil] [r ruleset]]
-        (let [[query (do (print "making query") (.to-query r))]
-              [lines (do (print "start search") (list (.find db query)))]]
-          (print "found lines")
+        (let [[query (.to-query r)]
+              [lines (list (.find db query))]]
+          (print "query done")
           (if (empty? lines)
             (recur nil (.weaken! ruleset))
             (do
-             (print "end")
+             (print "found line")
              (random-nth lines))))))
+
+(defn poem-from-template-exp [template db &optional sound-cache]
+  (let [[executor (ThreadPoolExecutor 4)]
+        [letters->sounds (build-letters->sounds db template sound-cache)]
+        [poem-lines (.map executor (fn [tmpl-line]
+                                     (->> tmpl-line
+                                         (extract-ruleset db letters->sounds)
+                                         (ruleset->line db)))
+                          template)]]
+    (.shutdown executor)
+    poem-lines))
+
 
 ; # Main entry point
 (defn poem-from-template-async [template db &optional sound-cache]

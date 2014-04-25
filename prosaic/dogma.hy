@@ -22,8 +22,10 @@
   (let [[wrapped-pat (+ ".*" pat ".*")]
         [reg-pat (.compile re wrapped-pat)]]
     (match reg-pat str)))
+
 (defclass rule []
-  [[strength 0]
+  [[__slots__ []]
+   [strength 0]
    [weaken! (fn [self]
               (let [[str (. self strength)]]
                 (if (> str 0)
@@ -36,7 +38,8 @@
                {})]])
 
 (defclass syllable-count-rule [rule]
-   [[to-query (fn [self]
+   [[__slots__ ["syllables" "strength"]]
+    [to-query (fn [self]
                (if (= 0 (. self strength))
                   (.to-query (super))
                   (let [[syllables (. self syllables)]
@@ -52,12 +55,12 @@
 
 
 (defclass keyword-rule [rule]
-  [[strength 11]
+  [[__slots__ ["keyword" "phrase_cache" "strength"]]
    [max-strength 11]
-   [phrase-cache []]
    [where-clause-tmpl "Math.abs({} - this.line_no) <= {}"]
 
    [__init__ (fn [self keyword db]
+               (setv (. self strength) 11)
                (setv (. self keyword) (word->stem keyword))
                (.prime-cache! self db)
                nil)]
@@ -96,8 +99,9 @@
                                       ok-distance)})))]])
 
 (defclass rhyme-rule [rule]
-  [[strength 3]
+  [[__slots__ ["sound" "strength"]]
    [__init__ (fn [self rhyme]
+               (setv (. self strength) 3)
                (setv (. self sound) rhyme)
                nil)]
    [next-sound (fn [self]
