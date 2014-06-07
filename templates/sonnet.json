@@ -1,0 +1,21 @@
+{
+    "lines": [
+        {"rhyme":"A"},
+        {"rhyme":"B"},
+        {"rhyme":"A"},
+        {"rhyme":"B"},
+
+        {"rhyme":"C"},
+        {"rhyme":"D"},
+        {"rhyme":"C"},
+        {"rhyme":"D"},
+
+        {"rhyme":"E"},
+        {"rhyme":"F"},
+        {"rhyme":"E"},
+        {"rhyme":"F"},
+
+        {"rhyme":"G"},
+        {"rhyme":"G"}
+    ]
+}
