@@ -1,8 +1,8 @@
-{ "lines": [
-        {"num_syllables":1},
-        {"num_syllables":1},
-        {"num_syllables":2},
-        {"num_syllables":3},
-        {"num_syllables":5},
-        {"num_syllables":8}
-]}
+[
+  {"syllables":1},
+  {"syllables":1},
+  {"syllables":2},
+  {"syllables":3},
+  {"syllables":5},
+  {"syllables":8}
+]
