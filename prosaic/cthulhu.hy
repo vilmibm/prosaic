@@ -55,11 +55,9 @@
               self)]])
 
 (defn build-sound-cache [db]
-  (print "Building sound cache")
   (.distinct (.find db) "rhyme_sound"))
 
 (defn build-letters->sounds [db template &optional sound-cache]
-  (print "building letters->sound")
   (let [[letters (list (set (pluck template "rhyme")))]]
     (if (empty? letters)
       {}
@@ -71,7 +69,6 @@
              dict)))))
 
 (defn extract-rule [db l->s raw-pair]
-  (print "extracting a rule")
   (let [[type (first raw-pair)]
         [arg  (second raw-pair)]]
     (cond
@@ -82,7 +79,6 @@
 
 ;; need to transform dictionary -> list of rules
 (defn extract-ruleset [db letters->sounds tmpl-line]
-  (print "extracting a ruleset")
   (->> tmpl-line
        .items
        (map (partial extract-rule db letters->sounds))
@@ -90,24 +86,21 @@
        rule-set))
 
 (defn template->rulesets [db template executor &optional sound-cache]
-  (print "extracting rulesets")
   (let [[letters->sounds (build-letters->sounds
                           db template sound-cache)]]
   (list (.map executor (partial extract-ruleset db letters->sounds) template))))
 
 (defn ruleset->line [db ruleset]
-  (print "start")
   (loop [[line nil] [r ruleset]]
         (let [[query (.to-query r)]
               [lines (list (.find db query))]]
-          (print "query done")
           (if (empty? lines)
             (recur nil (.weaken! ruleset))
             (do
-             (print "found line")
              (random-nth lines))))))
 
-(defn poem-from-template-exp [template db &optional sound-cache]
+; # Main entry point
+(defn poem-from-template [template db &optional sound-cache]
   (let [[executor (ThreadPoolExecutor 4)]
         [letters->sounds (build-letters->sounds db template sound-cache)]
         [poem-lines (.map executor (fn [tmpl-line]
@@ -116,15 +109,4 @@
                                          (ruleset->line db)))
                           template)]]
     (.shutdown executor)
-    poem-lines))
-
-
-; # Main entry point
-(defn poem-from-template-async [template db &optional sound-cache]
-  (let [[executor (ThreadPoolExecutor 10)]
-        [rulesets (template->rulesets db template executor sound-cache)]
-        [poem-lines (list (.map executor
-                                (partial ruleset->line db)
-                                rulesets))]]
-    (.shutdown executor)
-    poem-lines))
+    (list poem-lines)))

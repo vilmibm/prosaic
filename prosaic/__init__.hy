@@ -42,13 +42,16 @@
 ;; Frontends
 (defn load [txt-filename db]
   (let [[txt (slurp txt-filename)]]
-    (process-txt! txt txt-filename db)))
+    (process-txt! txt txt-filename db)
+    (print "done.")))
 
 (defn create [template-filename db]
   (let [[template (->> template-filename
                        slurp
-                       loads)]]
-    (poem-from-template template db)))
+                       loads)]
+        [poem-lines (poem-from-template template db)]]
+    (for [line poem-lines]
+      (print (.get line "raw")))))
 
 ;; Datbase interaction
 (defn db-connect [dbname]
@@ -58,7 +61,7 @@
 (defn dispatch [action args]
   (let [[fun (cond [(= action "load") load]
                    [(= action "create") create])]]
-    (print (apply fun args))
+    (apply fun args)
     0))
     ;;(try (do
     ;;      (print (apply fun args))

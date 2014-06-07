@@ -1,10 +1,10 @@
 (import json)
 (import [time [time]])
-(import [cthulhu [poem-from-template-exp build-sound-cache]])
+(import [cthulhu [poem-from-template build-sound-cache]])
 (import [pymongo [MongoClient]])
 
-;(def db (. (MongoClient) prosaic phrases))
-(def db (. (MongoClient) cbprop phrases))
+(def db (. (MongoClient) prosaic phrases))
+;(def db (. (MongoClient) cbprop phrases))
 
 (def sound-cache (build-sound-cache db))
 
@@ -83,7 +83,7 @@
 
 (print "Go!")
 (def start (time))
-(poem-from-template-exp sonnet0 db sound-cache)
+(print (list (map (fn [x] (.get x "raw")) (poem-from-template sonnet0 db sound-cache))))
 (def end (time))
 (print "Took " (- end start))
 
