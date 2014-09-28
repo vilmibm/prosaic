@@ -15,15 +15,20 @@
 
 (require hy.contrib.loop)
 
+(defn hack-nltk-data-path! []
+  ;; TODO will nltk search *all* of these paths for things, or just
+  ;; take the first match and use that?
+  (setv (. nltk data path) (+ (. nltk data path)
+                              (->> (. sys path)
+                                   (map (fn [p] (.format "{}/prosaic/nltk_data" p)))
+                                   list))))
+
 (import [functools [partial reduce]])
 (import re)
 (import sys)
 
 (import nltk)
-(setv (. nltk data path) (+ (. nltk data path)
-                            (->> (. sys path)
-                                 (map (fn [p] (.format "{}/prosaic/nltk_data" p)))
-                                 list)))
+(hack-nltk-data-path!)
 (import [nltk.chunk :as chunk])
 (import [nltk.corpus [cmudict]])
 
