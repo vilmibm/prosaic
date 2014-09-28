@@ -16,17 +16,17 @@
 ;; These are here so this file can be used to programmatically include
 ;; the various prosaic modules
 ;; (eg (import [prosaic.nyarlathotep [process-txt!]]))
-(import util)
-(import cthulhu)
-(import nyarlathotep)
+;;(import prosaic.util)
+;;(import prosaic.cthulhu)
+;;(import prosaic.nyarlathotep)
 
 ;; Relevant includes for driver code
 (require hy.contrib.multi)
 (import [json [loads]])
 (import sys)
 (import [pymongo [MongoClient]])
-(import [nyarlathotep [process-txt!]])
-(import [cthulhu [poem-from-template]])
+(import [prosaic.nyarlathotep [process-txt!]])
+(import [prosaic.cthulhu [poem-from-template]])
 
 ;; General utility
 (defmulti main-err

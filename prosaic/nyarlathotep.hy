@@ -20,11 +20,15 @@
 (import sys)
 
 (import nltk)
+(setv (. nltk data path) (+ (. nltk data path)
+                            (->> (. sys path)
+                                 (map (fn [p] (.format "{}/prosaic/nltk_data" p)))
+                                 list)))
 (import [nltk.chunk :as chunk])
 (import [nltk.corpus [cmudict]])
 
-(import [util [match]])
-(import [nltk-util [word->stem]])
+(import [prosaic.util [match]])
+(import [prosaic.nltk-util [word->stem]])
 
 
 ;; # General Utility Functions
