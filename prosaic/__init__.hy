@@ -54,8 +54,8 @@
       (print (.get line "raw")))))
 
 ;; Datbase interaction
-(defn db-connect [dbname]
-  (. (MongoClient) [dbname] phrases))
+(defn db-connect [dbname &optional dbhost]
+  (. (MongoClient dbhost) [dbname] phrases))
 
 ;; Driver code
 (defn dispatch [action args]
@@ -71,6 +71,8 @@
     ;;       (main-err e)))))
 
 (defmulti main
+  ([action filename dbname dbhost]
+   (dispatch action [filename (db-connect dbname dbhost)]))
   ([action filename dbname]
    (dispatch action [filename (db-connect dbname)]))
   ([action filename]
