@@ -18,7 +18,7 @@ setup(
     ],
     keywords='poetry',
     packages=['prosaic'],
-    install_requires = ['pymongo==2.7.2', 'hy==0.10.0', 'nltk==3.0.0'],
+    install_requires = ['pymongo==2.7.2', 'hy==0.10.0', 'nltk==3.0.0', 'numpy==1.9.0'],
     include_package_data = True,
     # TODO entry points
 )
