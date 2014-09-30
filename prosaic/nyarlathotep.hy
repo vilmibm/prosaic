@@ -159,3 +159,6 @@
       (let [[tagged-sen (nth tagged-sens ix)]
             [to-db      (process-sentence tagged-sen source ix)]]
         (store! db to-db)))))
+
+;; Re-export so it can be called from python:
+(def process-txt process-txt!)
