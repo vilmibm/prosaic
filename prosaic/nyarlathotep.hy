@@ -40,6 +40,7 @@
 (defn invert [f] (fn [&rest args] (not (apply f args))))
 (defn plus [x y] (+ x y)) ;; 2-arity for reducing
 (defn comp [f g] (fn [&rest args] (f (apply g args))))
+(defn sum [xs] (reduce plus xs 0))
 
 ;; # NLTK Helpers
 (def sd (nltk.data.load "tokenizers/punkt/english.pickle"))
@@ -101,7 +102,7 @@
   (->> tagged-sen
        (map first)
        (map count-syllables-in-word)
-       (reduce plus)))
+       sum))
 
 (defn tagged->str [tagged-sen]
   (loop [[str ""] [t-s tagged-sen]]
@@ -159,6 +160,3 @@
       (let [[tagged-sen (nth tagged-sens ix)]
             [to-db      (process-sentence tagged-sen source ix)]]
         (store! db to-db)))))
-
-;; Re-export so it can be called from python:
-(def process-txt process-txt!)
