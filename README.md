@@ -27,12 +27,10 @@ the setup.py works, but beware that you still have to manually run the hy \_\_in
  * clone this repo
  * virtualenv ~/prosaic -p $(which python3)
  * source ~/prosaic/bin/activate
- * cd prosaic/prosaic and run the below commands
+ * cd prosaic && pip install .
+ * cd prosaic (into the source code) and run the below commands
 
 (obviously you are welcome to put the venv wherever).
-
-assuming you can get the prereqs (nltk3, numpy, hy, pymongo) installed properly,
-you can run prosaic like so:
 
         hy __init__.hy load some_text0.txt some_mongo_db_name
         hy __init__.hy load some_text1.txt some_mongo_db_name
