@@ -22,7 +22,7 @@ and licensed under the [GPL](https://www.gnu.org/copyleft/gpl.html).
 
 ## notes
 
-the setup.py works, but beware that you still have to manually run the hy __init__.hy script. The workflow I use is:
+the setup.py works, but beware that you still have to manually run the hy \_\_init\_\_.hy script. The workflow I use is:
 
  * clone this repo
  * virtualenv ~/prosaic -p $(which python3)
