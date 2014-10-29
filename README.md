@@ -22,8 +22,14 @@ and licensed under the [GPL](https://www.gnu.org/copyleft/gpl.html).
 
 ## notes
 
-the setup.py doesn't work yet (help?) and packaging nltk stuff is
-proving to be hard.
+the setup.py works, but beware that you still have to manually run the hy __init__.hy script. The workflow I use is:
+
+ * clone this repo
+ * virtualenv ~/prosaic -p $(which python3)
+ * source ~/prosaic/bin/activate
+ * cd prosaic/prosaic and run the below commands
+
+(obviously you are welcome to put the venv wherever).
 
 assuming you can get the prereqs (nltk3, numpy, hy, pymongo) installed properly,
 you can run prosaic like so:
@@ -32,7 +38,7 @@ you can run prosaic like so:
         hy __init__.hy load some_text1.txt some_mongo_db_name
         hy __init__.hy load some_text2.txt some_mongo_db_name
 
-        hy __init__.hy create templates/haiku.json some_mongo_db_name
+        hy __init__.hy create ../templates/haiku.json some_mongo_db_name
 
 one can also do this programmatically from either python (you'll need
 to compile all of the hy with hyc first) or hy; import
