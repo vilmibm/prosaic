@@ -169,10 +169,6 @@
         top-level-parser))
 
 ;; Frontends
-(defn load [txt-filename db]
-  (let [[txt (slurp txt-filename)]]
-    (process-txt! txt txt-filename db)
-    (print "done.")))
 
 (defn create [template-filename db]
   (let [[template (->> template-filename
@@ -186,7 +182,7 @@
 (defn main []
   (let [[argument-parser (init-arg-parser)]
         [parsed-args (.parse_args argument-parser)]]
-    (print ((. parsed-args func) parsed-args))
+    ((. parsed-args func) parsed-args)
     0))
 
 (if (= __name__ "__main__")
