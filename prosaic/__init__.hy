@@ -66,7 +66,16 @@
 (defn db-connect [dbhost dbport dbname]
   (. (MongoClient dbhost dbport) [dbname] phrases))
 
-(defn corpus-loadfile* [] "corpus loadfile")
+(defn args->db [parsed-args]
+  (db-connect (. parsed-args host)
+              (. parsed-args port)
+              (. parsed-args dbname)))
+
+(defn corpus-loadfile* [parsed-args]
+  (let [[db (args->db parsed-args)]
+        [path (. parsed-args path)]
+        [txt (slurp path)]]
+    (process-txt! txt path db)))
 
 (defn corpus-ls* [] "corpus ls")
 
@@ -81,7 +90,6 @@
 (defn template-new* [] "tmpl new")
 (defn template-rm* [] "tmpl rm")
 (defn install* [] "install")
-
 
 (defn arg-parser [] (ArgumentParser))
 (defn add-argument! [arg-parser args kwargs]
@@ -129,6 +137,8 @@
 
         (-> (.add_parser corpus-subs "loadfile")
             (set-defaults! {"func" corpus-loadfile*})
+            (add-argument! ["path"]
+                           {"type" str "action" "store"})
             add-db-args!)
 
         (-> (.add_parser poem-subs "new")
@@ -176,10 +186,8 @@
 (defn main []
   (let [[argument-parser (init-arg-parser)]
         [parsed-args (.parse_args argument-parser)]]
-    (print (. parsed-args host))
-    (print (. parsed-args port))
-    (print (. parsed-args dbname))
-    ((. parsed-args func))))
+    (print ((. parsed-args func) parsed-args))
+    0))
 
 (if (= __name__ "__main__")
   (.exit sys (main)))
