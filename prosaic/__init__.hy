@@ -66,51 +66,97 @@
 (defn db-connect [dbhost dbport dbname]
   (. (MongoClient dbhost dbport) [dbname] phrases))
 
+(defn corpus-loadfile* [] "corpus loadfile")
+
+(defn corpus-ls* [] "corpus ls")
+
+(defn corpus-rm* [] "corpus rm")
+
+(defn poem-new* [] "poem new")
+(defn poem-ls* [] "poem ls")
+(defn poem-rm* [] "poem rm")
+(defn poem-clean* [] "poem clean")
+
+(defn template-ls* [] "tmpl ls")
+(defn template-new* [] "tmpl new")
+(defn template-rm* [] "tmpl rm")
+(defn install* [] "install")
+
+
 (defn arg-parser [] (ArgumentParser))
-(defn add-argument [arg-parser name type &optional default]
-  (apply .add_argument [arg-parser name] {"type" type "default" (or default nil)})
+(defn add-argument! [arg-parser args kwargs]
+  (apply .add_argument (+ [arg-parser] args) kwargs)
+  arg-parser)
+(defn set-defaults! [arg-parser defaults]
+  (apply .set_defaults [arg-parser] defaults)
   arg-parser)
 
 (defn init-arg-parser []
   ;; TODO pass in defaults, env
   (let [[top-level-parser (apply ArgumentParser [] {"prog" "prosaic"})]
         [add-db-args! (fn [ap] (-> ap
-                                   (add-argument "--host" str DEFAULT-HOST)
-                                   (add-argument "--port" int DEFAULT-PORT)
-                                   (add-argument "--dbname" str DEFAULT-DB)))]
+                                   (add-argument! ["-n" "--host"]
+                                                  {"type" str
+                                                   "default" DEFAULT-HOST
+                                                   "action" "store"})
+
+                                   (add-argument! ["-p" "--port"]
+                                                  {"type" int
+                                                   "default" DEFAULT-PORT
+                                                   "action" "store"})
+
+                                   (add-argument! ["-d" "--dbname"]
+                                                  {"type" str
+                                                   "default" DEFAULT-DB
+                                                   "action" "store"})))]
 
         [subparsers (.add_subparsers top-level-parser)]
 
-        [corpus-parser   (.add_parser subparsers "corpus")]
-        [corpus-subs     (.add_subparsers corpus-parser)]
-
-        [corpus-ls (-> (.add_parser corpus-subs "ls")
-                       add-db-args!)]
-        [corpus-rm (-> (.add_parser corpus-subs "rm")
-                       add-db-args!)]
-        [corpus-load (-> (.add_parser corpus-subs "loadfile")
-                         add-db-args!)]
-
-        [poem-parser (-> (.add_parser subparsers "poem")
-                         add-db-args!)]
+        [corpus-parser (.add_parser subparsers "corpus")]
+        [corpus-subs (.add_subparsers corpus-parser)]
+        [poem-parser (.add_parser subparsers "poem")]
         [poem-subs (.add_subparsers poem-parser)]
-
-        [poem-new  (-> (.add_parser poem-subs "new")
-                       add-db-args!)]
-        [poem-ls (.add_parser poem-subs "ls")]
-        [poem-rm (.add_parser poem-subs "rm")]
-        [poem-clean (.add_parser poem-subs "clean")]
-
         [template-parser (.add_parser subparsers "template")]
-        [template-subs (.add_subparsers template-parser)]
+        [template-subs (.add_subparsers template-parser)]]
 
-        [template-ls (.add_parser template-subs "ls")]
-        [template-rm (.add_parser template-subs "rm")]
-        [template-new (.add_parser template-subs "new")]
+        (-> (.add_parser corpus-subs "ls")
+            (set-defaults! {"func" corpus-ls*})
+            add-db-args!)
 
-        [install-parser  (.add_parser subparsers "install")]]
+        (-> (.add_parser corpus-subs "rm")
+            (set-defaults! {"func" corpus-rm*})
+            add-db-args!)
 
-    top-level-parser))
+        (-> (.add_parser corpus-subs "loadfile")
+            (set-defaults! {"func" corpus-loadfile*})
+            add-db-args!)
+
+        (-> (.add_parser poem-subs "new")
+            (set-defaults! {"func" poem-new*})
+            add-db-args!)
+
+        (-> (.add_parser poem-subs "ls")
+            (set-defaults! {"func" poem-ls*}))
+
+        (-> (.add_parser poem-subs "rm")
+            (set-defaults! {"func" poem-rm*}))
+
+        (-> (.add_parser poem-subs "clean")
+            (set-defaults! {"func" poem-clean*}))
+
+        (-> (.add_parser template-subs "ls")
+            (set-defaults! {"func" template-ls*}))
+
+        (-> (.add_parser template-subs "rm")
+            (set-defaults! {"func" template-rm*}))
+
+        (-> (.add_parser template-subs "new")
+            (set-defaults! {"func" template-new*}))
+
+        (-> (.add_parser subparsers "install")
+            (set-defaults! {"func" install*}))
+
+        top-level-parser))
 
 ;; Frontends
 (defn load [txt-filename db]
@@ -128,8 +174,12 @@
 
 ;; Driver code
 (defn main []
-  (let [[argument-parser (init-arg-parser)]]
-    (.parse_args argument-parser)))
+  (let [[argument-parser (init-arg-parser)]
+        [parsed-args (.parse_args argument-parser)]]
+    (print (. parsed-args host))
+    (print (. parsed-args port))
+    (print (. parsed-args dbname))
+    ((. parsed-args func))))
 
 (if (= __name__ "__main__")
   (.exit sys (main)))
