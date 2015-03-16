@@ -22,7 +22,7 @@
 
 ;; Relevant includes for driver code
 (import sys)
-(import [argparse [ArgumentParser]])
+(import [argparse [ArgumentParser FileType]])
 (import [json [loads]])
 (import [os [environ]])
 (import [os.path [join]])
@@ -59,8 +59,10 @@
                             (.join "")))
 
 (defn read-template [name]
-  (-> (join TEMPLATES name DEFAULT_TMPL_EXT)
-      slurp))
+  (let [[path (if (.startswith name "/")
+                name
+                (join TEMPLATES (+ name "." DEFAULT_TMPL_EXT)))]]
+        (slurp path)))
 
 ;; Datbase interaction
 (defn db-connect [dbhost dbport dbname]
@@ -70,6 +72,14 @@
   (db-connect (. parsed-args host)
               (. parsed-args port)
               (. parsed-args dbname)))
+
+(defn args->template [parsed-args]
+  (-> (if (. parsed-args tmpl-raw)
+        (->> (. parsed-args infile)
+             .readlines
+             (.join ""))
+        (read-template (. parsed-args tmpl)))
+      loads))
 
 (defn corpus-loadfile* [parsed-args]
   (let [[db (args->db parsed-args)]
@@ -81,7 +91,13 @@
 
 (defn corpus-rm* [] "corpus rm")
 
-(defn poem-new* [] "poem new")
+(defn poem-new* [parsed-args]
+  (let [[template (args->template parsed-args)]
+        [db (args->db parsed-args)]
+        [poem-lines (poem-from-template template db)]]
+    (for [line poem-lines]
+      (print (.get line "raw")))))
+
 (defn poem-ls* [] "poem ls")
 (defn poem-rm* [] "poem rm")
 (defn poem-clean* [] "poem clean")
@@ -127,56 +143,67 @@
         [template-parser (.add_parser subparsers "template")]
         [template-subs (.add_subparsers template-parser)]]
 
-        (-> (.add_parser corpus-subs "ls")
-            (set-defaults! {"func" corpus-ls*})
-            add-db-args!)
+    (add-argument! top-level-parser ["infile"] {"nargs" "?"
+                                                "type" (FileType "r")
+                                                "default" sys.stdin})
 
-        (-> (.add_parser corpus-subs "rm")
-            (set-defaults! {"func" corpus-rm*})
-            add-db-args!)
+    ;; corpus ls
+    (-> (.add_parser corpus-subs "ls")
+        (set-defaults! {"func" corpus-ls*})
+        add-db-args!)
 
-        (-> (.add_parser corpus-subs "loadfile")
-            (set-defaults! {"func" corpus-loadfile*})
-            (add-argument! ["path"]
-                           {"type" str "action" "store"})
-            add-db-args!)
+    ;; corpus rm
+    (-> (.add_parser corpus-subs "rm")
+        (set-defaults! {"func" corpus-rm*})
+        add-db-args!)
 
-        (-> (.add_parser poem-subs "new")
-            (set-defaults! {"func" poem-new*})
-            add-db-args!)
+    ;; corpus loadfile
+    (-> (.add_parser corpus-subs "loadfile")
+        (set-defaults! {"func" corpus-loadfile*})
+        (add-argument! ["path"]
+                       {"type" str "action" "store"})
+        add-db-args!)
 
-        (-> (.add_parser poem-subs "ls")
-            (set-defaults! {"func" poem-ls*}))
+    ;; poem new
+    (-> (.add_parser poem-subs "new")
+        (set-defaults! {"func" poem-new*})
+        (add-argument! ["-r" "--tmpl-raw"]
+                       {"action" "store_true"})
+        (add-argument! ["-t" "--tmpl"]
+                       {"type" str
+                        "default" "haiku"
+                        "action" "store"})
+        add-db-args!)
 
-        (-> (.add_parser poem-subs "rm")
-            (set-defaults! {"func" poem-rm*}))
+    ;; poem ls
+    (-> (.add_parser poem-subs "ls")
+        (set-defaults! {"func" poem-ls*}))
 
-        (-> (.add_parser poem-subs "clean")
-            (set-defaults! {"func" poem-clean*}))
+    ;; poem rm
+    (-> (.add_parser poem-subs "rm")
+        (set-defaults! {"func" poem-rm*}))
 
-        (-> (.add_parser template-subs "ls")
-            (set-defaults! {"func" template-ls*}))
+    ;; poem clean
+    (-> (.add_parser poem-subs "clean")
+        (set-defaults! {"func" poem-clean*}))
 
-        (-> (.add_parser template-subs "rm")
-            (set-defaults! {"func" template-rm*}))
+    ;; template ls
+    (-> (.add_parser template-subs "ls")
+        (set-defaults! {"func" template-ls*}))
 
-        (-> (.add_parser template-subs "new")
-            (set-defaults! {"func" template-new*}))
+    ;; template rm
+    (-> (.add_parser template-subs "rm")
+        (set-defaults! {"func" template-rm*}))
 
-        (-> (.add_parser subparsers "install")
-            (set-defaults! {"func" install*}))
+    ;; template new
+    (-> (.add_parser template-subs "new")
+        (set-defaults! {"func" template-new*}))
 
-        top-level-parser))
+    ;; install
+    (-> (.add_parser subparsers "install")
+        (set-defaults! {"func" install*}))
 
-;; Frontends
-
-(defn create [template-filename db]
-  (let [[template (->> template-filename
-                       slurp
-                       loads)]
-        [poem-lines (poem-from-template template db)]]
-    (for [line poem-lines]
-      (print (.get line "raw")))))
+    top-level-parser))
 
 ;; Driver code
 (defn main []
