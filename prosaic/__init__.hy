@@ -68,6 +68,10 @@
 (defn db-connect [dbhost dbport dbname]
   (. (MongoClient dbhost dbport) [dbname] phrases))
 
+(defn args->mclient [parsed-args]
+  (MongoClient (. parsed-args host)
+               (. parsed-args port)))
+
 (defn args->db [parsed-args]
   (db-connect (. parsed-args host)
               (. parsed-args port)
@@ -87,9 +91,15 @@
         [txt (slurp path)]]
     (process-txt! txt path db)))
 
-(defn corpus-ls* [] "corpus ls")
+(defn corpus-ls* [parsed-args]
+  (let [[mc (args->mclient parsed-args)]]
+    (for [db-name (.database_names mc)]
+      (print db-name))))
 
-(defn corpus-rm* [] "corpus rm")
+(defn corpus-rm* [parsed-args]
+  (let [[mc (args->mclient parsed-args)]
+        [dbname (. parsed-args dbname)]]
+    (.drop_database mc dbname)))
 
 (defn poem-new* [parsed-args]
   (let [[template (args->template parsed-args)]
@@ -118,21 +128,27 @@
 (defn init-arg-parser []
   ;; TODO pass in defaults, env
   (let [[top-level-parser (apply ArgumentParser [] {"prog" "prosaic"})]
+        [add-host-arg! (fn [ap] (add-argument! ap ["-n" "--host"]
+                                               {"type" str
+                                                "default" DEFAULT-HOST
+                                                "action" "store"})
+                         ap)]
+        [add-port-arg! (fn [ap] (add-argument! ap ["-p" "--port"]
+                                               {"type" int
+                                                "default" DEFAULT-PORT
+                                                "action" "store"})
+                         ap)]
+        [add-dbname-arg! (fn [ap] (add-argument! ap ["-d" "--dbname"]
+                                                 {"type" str
+                                                  "default" DEFAULT-DB
+                                                  "action" "store"})
+                           ap)]
+
         [add-db-args! (fn [ap] (-> ap
-                                   (add-argument! ["-n" "--host"]
-                                                  {"type" str
-                                                   "default" DEFAULT-HOST
-                                                   "action" "store"})
-
-                                   (add-argument! ["-p" "--port"]
-                                                  {"type" int
-                                                   "default" DEFAULT-PORT
-                                                   "action" "store"})
-
-                                   (add-argument! ["-d" "--dbname"]
-                                                  {"type" str
-                                                   "default" DEFAULT-DB
-                                                   "action" "store"})))]
+                                   add-host-arg!
+                                   add-port-arg!
+                                   add-dbname-arg!)
+                        ap)]
 
         [subparsers (.add_subparsers top-level-parser)]
 
@@ -155,8 +171,12 @@
     ;; corpus rm
     (-> (.add_parser corpus-subs "rm")
         (set-defaults! {"func" corpus-rm*})
-        add-db-args!)
-
+        add-host-arg!
+        add-port-arg!
+        (add-argument! ["dbname"]
+                       {"type" str
+                        "default" "prosaic"
+                        "action" "store"}))
     ;; corpus loadfile
     (-> (.add_parser corpus-subs "loadfile")
         (set-defaults! {"func" corpus-loadfile*})
