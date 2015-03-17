@@ -113,6 +113,7 @@
     (for [line poem-lines]
       (print (.get line "raw")))))
 
+;; TODO implement poem commands
 (defn poem-ls* [] "poem ls")
 (defn poem-rm* [] "poem rm")
 (defn poem-clean* [] "poem clean")
@@ -142,6 +143,7 @@
         [tmpl-abspath (join TEMPLATES (+ tmpl-name "." DEFAULT-TMPL-EXT))]]
     (rm tmpl-abspath)))
 
+;; TODO implement install command
 (defn install* [] "install")
 
 (defn arg-parser [] (ArgumentParser))
