@@ -22,11 +22,15 @@
 
 ;; Relevant includes for driver code
 (import sys)
+(import [subprocess [call]])
 (import [argparse [ArgumentParser FileType]])
 (import [json [loads]])
-(import [os [environ]])
+(import [os [environ listdir]])
 (import [os.path [join]])
+
+(import [sh [rm cp]])
 (import [pymongo [MongoClient]])
+
 (import [prosaic.nyarlathotep [process-txt!]])
 (import [prosaic.cthulhu [poem-from-template]])
 
@@ -40,6 +44,7 @@
 (def TEMPLATES (join PROSAIC-HOME "templates"))
 (def POEMS (join PROSAIC-HOME "poems"))
 
+(def EXAMPLE-TMPL (join TEMPLATES ".example.template"))
 ;; CLI UI
 ;; prosaic corpus ls -hpd
 ;; prosaic corpus loadfile -h <host> -p <port> -d <db> <filename>
@@ -112,9 +117,31 @@
 (defn poem-rm* [] "poem rm")
 (defn poem-clean* [] "poem clean")
 
-(defn template-ls* [] "tmpl ls")
-(defn template-new* [] "tmpl new")
-(defn template-rm* [] "tmpl rm")
+(defn template-ls* [parsed-args]
+  (->> (listdir TEMPLATES)
+       (filter (fn [s] (not (.startswith s "."))))
+       (map (fn [s] (.replace s (+ "." DEFAULT-TMPL-EXT) "")))
+       (map print)
+       list))
+
+(defn template-new* [parsed-args]
+  (let [[tmpl-name (. parsed-args tmplname)]
+        [tmpl-abspath (join TEMPLATES (+ tmpl-name "." DEFAULT-TMPL-EXT))]
+        [editor (.get environ "EDITOR" "vi")]]
+    (cp  EXAMPLE-TMPL tmpl-abspath)
+    (call [editor tmpl-abspath])))
+
+(defn template-edit* [parsed-args]
+  (let [[tmpl-name (. parsed-args tmplname)]
+        [tmpl-abspath (join TEMPLATES (+ tmpl-name "." DEFAULT-TMPL-EXT))]
+        [editor (.get environ "EDITOR" "vi")]]
+    (call [editor tmpl-abspath])))
+
+(defn template-rm* [parsed-args]
+  (let [[tmpl-name (. parsed-args tmplname)]
+        [tmpl-abspath (join TEMPLATES (+ tmpl-name "." DEFAULT-TMPL-EXT))]]
+    (rm tmpl-abspath)))
+
 (defn install* [] "install")
 
 (defn arg-parser [] (ArgumentParser))
@@ -213,11 +240,24 @@
 
     ;; template rm
     (-> (.add_parser template-subs "rm")
+        (add-argument! ["tmplname"]
+                       {"action" "store"
+                        "type" str})
         (set-defaults! {"func" template-rm*}))
 
     ;; template new
     (-> (.add_parser template-subs "new")
+        (add-argument! ["tmplname"]
+                       {"action" "store"
+                        "type" str})
         (set-defaults! {"func" template-new*}))
+
+    ;; template edit
+    (-> (.add_parser template-subs "edit")
+        (add-argument! ["tmplname"]
+                       {"action" "store"
+                        "type" str})
+        (set-defaults! {"func" template-edit*}))
 
     ;; install
     (-> (.add_parser subparsers "install")
