@@ -49,10 +49,7 @@
 ;; prosaic corpus ls -hpd
 ;; prosaic corpus loadfile -h <host> -p <port> -d <db> <filename>
 ;; prosaic corpus rm -h <host> -p <port> -d <db>
-;; prosaic poem new -h <host> -p <port> -d <db> -t <tmpl> (<name>)
-;; prosaic poem ls
-;; prosaic poem rm <filename>
-;; prosaic poem clean
+;; prosaic poem new -h <host> -p <port> -d <db> -t <tmpl> -o <name>
 ;; prosaic template new <name>
 ;; prosaic template ls
 ;; prosaic template rm <name>
@@ -109,14 +106,17 @@
 (defn poem-new* [parsed-args]
   (let [[template (args->template parsed-args)]
         [db (args->db parsed-args)]
-        [poem-lines (poem-from-template template db)]]
-    (for [line poem-lines]
-      (print (.get line "raw")))))
-
-;; TODO implement poem commands
-(defn poem-ls* [] "poem ls")
-(defn poem-rm* [] "poem rm")
-(defn poem-clean* [] "poem clean")
+        [poem-lines (poem-from-template template db)]
+        [output-filename (. parsed-args output)]]
+    ;; actually write poem to file if filename provided
+    (if output-filename
+      (with [[f (open output-filename "w")]]
+            (.write f (+ (->> poem-lines
+                              (map (fn [l] (.get l "raw")))
+                              (.join "\n"))
+                         "\n")))
+      (for [line poem-lines]
+        (print (.get line "raw"))))))
 
 (defn template-ls* [parsed-args]
   (->> (listdir TEMPLATES)
@@ -218,23 +218,13 @@
         (set-defaults! {"func" poem-new*})
         (add-argument! ["-r" "--tmpl-raw"]
                        {"action" "store_true"})
+        (add-argument! ["-o" "--output"]
+                       {"action" "store"})
         (add-argument! ["-t" "--tmpl"]
                        {"type" str
                         "default" "haiku"
                         "action" "store"})
         add-db-args!)
-
-    ;; poem ls
-    (-> (.add_parser poem-subs "ls")
-        (set-defaults! {"func" poem-ls*}))
-
-    ;; poem rm
-    (-> (.add_parser poem-subs "rm")
-        (set-defaults! {"func" poem-rm*}))
-
-    ;; poem clean
-    (-> (.add_parser poem-subs "clean")
-        (set-defaults! {"func" poem-clean*}))
 
     ;; template ls
     (-> (.add_parser template-subs "ls")
