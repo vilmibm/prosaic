@@ -76,8 +76,8 @@ are, of course, welcome to use prosaic however you see fit.
 
 ### changelog
 
-2.0.0 - shiny new CLI UI. run `hy __init__.hy -h` to see/explore the subcommands.
-1.0.0 - it works
+ * 2.0.0 - shiny new CLI UI. run `hy __init__.hy -h` to see/explore the subcommands.
+ * 1.0.0 - it works
 
 ### why hy?
 
