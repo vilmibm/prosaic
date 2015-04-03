@@ -26,9 +26,9 @@
 (import [argparse [ArgumentParser FileType]])
 (import [json [loads]])
 (import [os [environ listdir]])
-(import [os.path [join]])
+(import [os.path [join exists dirname expanduser]])
 
-(import [sh [rm cp]])
+(import [sh [rm cp mkdir]])
 (import [pymongo [MongoClient]])
 
 (import [prosaic.nyarlathotep [process-txt!]])
@@ -36,24 +36,27 @@
 
 (def DEFAULT-HOST "localhost")
 (def DEFAULT-PORT 27017)
-(def PROSAIC-HOME (.get environ "PROSAIC_HOME" "~/.prosaic"))
+(def PROSAIC-HOME (.get environ
+                        "PROSAIC_HOME"
+                        (join (expanduser "~") ".prosaic")))
 (def DEFAULT-DB "prosaic")
 (def DEFAULT-TMPL "haiku")
 (def DEFAULT-TMPL-EXT "json")
 
 (def TEMPLATES (join PROSAIC-HOME "templates"))
-(def POEMS (join PROSAIC-HOME "poems"))
 
 (def EXAMPLE-TMPL (join TEMPLATES ".example.template"))
+
 ;; CLI UI
+
+;; prosaic poem new -h <host> -p <port> -d <db> -t <tmpl> -o <name>
 ;; prosaic corpus ls -hpd
 ;; prosaic corpus loadfile -h <host> -p <port> -d <db> <filename>
 ;; prosaic corpus rm -h <host> -p <port> -d <db>
-;; prosaic poem new -h <host> -p <port> -d <db> -t <tmpl> -o <name>
 ;; prosaic template new <name>
 ;; prosaic template ls
 ;; prosaic template rm <name>
-;; prosaic install <path>
+
 ;; General utility
 (defn slurp [filename] (->> (open filename)
                             (.readlines)
@@ -65,6 +68,18 @@
                 name
                 (join TEMPLATES (+ name "." DEFAULT_TMPL_EXT)))]]
         (slurp path)))
+
+;; template installation
+(defn installed? []
+  (and
+   (exists PROSAIC-HOME)
+   (exists (join PROSAIC-HOME "templates"))))
+
+(defn install! []
+  (let [[install-path PROSAIC-HOME]
+        [template-source (join (dirname (. sys modules ["prosaic"] __file__)) "templates")]]
+    (mkdir install-path)
+    (cp "-r" template-source install-path )))
 
 ;; Datbase interaction
 (defn db-connect [dbhost dbport dbname]
@@ -142,9 +157,6 @@
   (let [[tmpl-name (. parsed-args tmplname)]
         [tmpl-abspath (join TEMPLATES (+ tmpl-name "." DEFAULT-TMPL-EXT))]]
     (rm tmpl-abspath)))
-
-;; TODO implement install command
-(defn install* [] "install")
 
 (defn arg-parser [] (ArgumentParser))
 (defn add-argument! [arg-parser args kwargs]
@@ -251,14 +263,14 @@
                         "type" str})
         (set-defaults! {"func" template-edit*}))
 
-    ;; install
-    (-> (.add_parser subparsers "install")
-        (set-defaults! {"func" install*}))
-
     top-level-parser))
 
 ;; Driver code
 (defn main []
+
+  (unless (installed?)
+    (install!))
+
   (let [[argument-parser (init-arg-parser)]
         [parsed-args (.parse_args argument-parser)]]
     ((. parsed-args func) parsed-args)
