@@ -24,19 +24,20 @@ and licensed under the [GPL](https://www.gnu.org/copyleft/gpl.html).
 
 the setup.py works, but beware that you still have to manually run the hy \_\_init\_\_.hy script. The workflow I use is:
 
+ * install python-dev(el), whatever makes sense for your platform
  * clone this repo
  * virtualenv ~/prosaic -p $(which python3)
  * source ~/prosaic/bin/activate
  * cd prosaic && pip install .
- * cd prosaic (into the source code) and run the below commands
+ * cd prosaic (into the source code, not the venv) and run the below commands
 
 (obviously you are welcome to put the venv wherever).
 
-        hy __init__.hy load some_text0.txt some_mongo_db_name
-        hy __init__.hy load some_text1.txt some_mongo_db_name
-        hy __init__.hy load some_text2.txt some_mongo_db_name
+        hy __init__.hy corpus loadfile -d some_mongo_db_name some_file0.txt
+        hy __init__.hy corpus loadfile -d some_mongo_db_name some_file1.txt
+        hy __init__.hy corpus loadfile -d some_mongo_db_name some_file2.txt
 
-        hy __init__.hy create ../templates/haiku.json some_mongo_db_name
+        hy __init__.hy poem new -t haiku -d some_mongo_db_name
 
 one can also do this programmatically from either python (you'll need
 to compile all of the hy with hyc first) or hy; import
@@ -44,6 +45,10 @@ to compile all of the hy with hyc first) or hy; import
 `prosaic.nyarlathotep.process-text!` to parse text and make
 corpora. There are no docs. read the source or look at `cthtest.hy`
 for some example usage.
+
+## working with templates
+
+a few sample poem templates are included with `prosaic`. you can check them out with `hy __init__.hy template ls` and then `hy __init__.hy template edit <template name>`. make your own with `hy __init__.hy template new <template name>`. templates are stored in `~/.prosaic`.
 
 ### how does prosaic work?
 
@@ -68,6 +73,11 @@ stanzas. finally, I augment the piece with original lines and then
 clean up any grammar / pronoun agreement from what prosaic
 emitted. the end result is a human-computer collaborative work. you
 are, of course, welcome to use prosaic however you see fit.
+
+### changelog
+
+2.0.0 - shiny new CLI UI. run `hy __init__.hy -h` to see/explore the subcommands.
+1.0.0 - it works
 
 ### why hy?
 
