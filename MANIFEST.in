@@ -1,3 +1,2 @@
 recursive-include prosaic *.hy
-recursive-include prosaic/nltk_data *
 recursive-include prosaic/templates *
