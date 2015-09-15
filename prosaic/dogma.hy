@@ -14,7 +14,7 @@
 ;   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 (import re)
 
-(import [nltk-util [word->stem]])
+(import [nlp [word->stem]])
 (import [util [match random-nth]])
 
 ;; # General Utility

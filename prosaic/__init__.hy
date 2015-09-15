@@ -28,6 +28,7 @@
 (import [os [environ listdir]])
 (import [os.path [join exists dirname expanduser]])
 
+(import nltk)
 (import [sh [rm cp mkdir]])
 (import [pymongo [MongoClient]])
 

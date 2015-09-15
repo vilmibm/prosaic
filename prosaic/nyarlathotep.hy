@@ -15,63 +15,13 @@
 
 (require hy.contrib.loop)
 
-(defn hack-nltk-data-path! []
-  ;; TODO will nltk search *all* of these paths for things, or just
-  ;; take the first match and use that?
-  (setv (. nltk data path) (+ (. nltk data path)
-                              (->> (. sys path)
-                                   (map (fn [p] (.format "{}/prosaic/nltk_data" p)))
-                                   list))))
+(import [functools [reduce]])
 
-(import [functools [partial reduce]])
-(import re)
-(import sys)
-
-(import nltk)
-(hack-nltk-data-path!)
-(import [nltk.chunk :as chunk])
-(import [nltk.corpus [cmudict]])
-
-(import [prosaic.util [match]])
-(import [prosaic.nltk-util [word->stem]])
-
+(import [nlp [is-vowel-pho? is-punct-tag? is-vowel? is-alpha-tag? word->stem word->phonemes tokenize-sen tag word->chars sentence->stems]])
 
 ;; # General Utility Functions
-(defn invert [f] (fn [&rest args] (not (apply f args))))
 (defn plus [x y] (+ x y)) ;; 2-arity for reducing
-(defn comp [f g] (fn [&rest args] (f (apply g args))))
 (defn sum [xs] (reduce plus xs 0))
-
-;; # NLTK Helpers
-(def sd (nltk.data.load "tokenizers/punkt/english.pickle"))
-(def cmudict-dict (.dict cmudict))
-(def vowel-pho-re (.compile re "AA|AE|AH|AO|AW|AY|EH|EY|ER|IH|IY|OW|OY|UH|UW"))
-(def vowel-re (.compile re "[aeiouAEIOU]"))
-(def punct-tag-re (.compile re "^[^a-zA-Z]+$"))
-
-(def is-vowel? (partial match vowel-re))
-(def is-vowel-pho? (partial match vowel-pho-re))
-(def is-punct-tag? (partial match punct-tag-re))
-(def is-alpha-tag? (invert is-punct-tag?))
-
-(defn word->phonemes [word]
-  (try
-   (first (get cmudict-dict (.lower word)))
-   (catch [e KeyError]
-     []))) ;; Not sure what is best here...
-
-(defn tokenize-sen [raw-text]
-  (.tokenize sd raw-text))
-
-(defn tag [sentence-str] (->> sentence-str
-                              (.word-tokenize nltk)
-                              (.pos-tag nltk)))
-
-(defn word->chars [word] (list word))
-(defn sentence->stems [tagged-sen]
-  (->> tagged-sen
-       (map (comp word->stem first))
-       list))
 
 (defn rhyme-sound [tagged-sen]
   (let [[is-punct-pair? (fn [tu] (is-alpha-tag? (second tu)))]
