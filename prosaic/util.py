@@ -18,6 +18,7 @@ import re
 first = lambda l: l[0] if len(l) > 0 else None
 match = lambda regex, string: bool(regex.match(string))
 random_nth = lambda l: l[randint(0, len(l)-1)]
+plus = lambda x,y: x + y
 
 def invert(f):
     def inverted_fun(*args):
