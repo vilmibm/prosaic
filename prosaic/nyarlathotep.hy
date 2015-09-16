@@ -17,14 +17,14 @@
 
 (import [functools [reduce]])
 
-(import [nlp [is-vowel-pho? is-punct-tag? is-vowel? is-alpha-tag? word->stem word->phonemes tokenize-sen tag word->chars sentence->stems]])
+(import [nlp [is_vowel_phoneme is_punctuation_tag is_vowel is_alphanumeric_tag word_to_phonemes sentences tag word_to_chars sentence_to_stems]])
 
 ;; # General Utility Functions
 (defn plus [x y] (+ x y)) ;; 2-arity for reducing
 (defn sum [xs] (reduce plus xs 0))
 
 (defn rhyme-sound [tagged-sen]
-  (let [[is-punct-pair? (fn [tu] (is-alpha-tag? (second tu)))]
+  (let [[is-punct-pair? (fn [tu] (is_alphanumeric_tag (second tu)))]
         [no-punct       (list (filter is-punct-pair? tagged-sen))]]
     (if (empty? no-punct)
       nil
@@ -33,7 +33,7 @@
                             list
                             first
                             first)]
-            [phonemes  (word->phonemes last-word)]]
+            [phonemes  (word_to_phonemes last-word)]]
         (.join "" (->> (reversed phonemes)
                        (take 3)
                        list
@@ -41,11 +41,11 @@
                        list))))))
 
 (defn count-syllables-in-word [word]
-  (let [[phonemes  (word->phonemes word)]
+  (let [[phonemes  (word_to_phonemes word)]
         [vowels (if phonemes
-                  (filter is-vowel-pho? phonemes)
-                  (->> (word->chars word) ;; fall back to raw vowel counting
-                       (filter is-vowel?)))]]
+                  (filter is_vowel_phoneme phonemes)
+                  (->> (word_to_chars word) ;; fall back to raw vowel counting
+                       (filter is_vowel)))]]
     (len (list vowels))))
 
 (defn count-syllables [tagged-sen]
@@ -61,7 +61,7 @@
           (let [[token-tuple (first t-s)]
                 [text        (first token-tuple)]
                 [tag         (second token-tuple)]
-                [text        (if (is-punct-tag? tag) text (+ " " text))]]
+                [text        (if (is_punctuation_tag tag) text (+ " " text))]]
             (recur (+ str text) (rest t-s))))))
 
 ;; # Database Interaction
@@ -87,13 +87,13 @@
             (recur (rest t-s) (+ new (split-multiclause (first t-s))))))))
 
 (defn process-sentence [tagged-sen source line-no]
-  {"stems"         (sentence->stems tagged-sen)
+  {"stems"         (sentence_to_stems tagged-sen)
    "source"        source
    "tagged"        tagged-sen
    "rhyme_sound"   (rhyme-sound tagged-sen)
    "phonemes"      (->> tagged-sen
                       (map first)
-                      (map word->phonemes)
+                      (map word_to_phonemes)
                       list)
    "num_syllables" (count-syllables tagged-sen)
    "line_no"       line-no
@@ -102,7 +102,7 @@
 ;; # Main entry point for text processing
 (defn process-txt! [raw-text source db]
   (let [[tagged-sens (->> raw-text
-                          tokenize-sen
+                          sentences
                           (map tag)
                           list
                           (expand-multiclause))]]

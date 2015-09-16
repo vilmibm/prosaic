@@ -14,7 +14,7 @@
 ;   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 (import re)
 
-(import [nlp [word->stem]])
+(import [nlp [stem_word]])
 (import [util [match random-nth]])
 
 ;; # General Utility
@@ -61,7 +61,7 @@
 
    [__init__ (fn [self keyword db]
                (setv (. self strength) 11)
-               (setv (. self keyword) (word->stem keyword))
+               (setv (. self keyword) (stem_word keyword))
                (.prime-cache! self db)
                nil)]
 
