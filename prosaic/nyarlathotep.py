@@ -12,41 +12,34 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from functools import reduce
-
 import nlp
-from util import plus
+from util import first
 
-# rhyme_sound(tagged_sentence)
-# count_syllables_in_word(word)
-# count_syllables(tagged_sentence)
-# tagged_sentence_to_string(tagged_sentence)
-# save(db, data)
-# is_multiclause(tagged_sentence)
-# split_multiclause(tagged_sentence)
-# expand_multiclause(tagged_sentences)
+def save(db, data):
+    return db.insert(data)
 
 def process_sentence(tagged_sentence, source_name, line_no):
     words = map(first, tagged_sentence)
-    phonemes = list(map(word_to_phonemes, words))
-    return {"stems": sentence_to_stems(tagged_sentence),
+    phonemes = list(map(nlp.word_to_phonemes, words))
+    return {"stems": nlp.stem_sentence(tagged_sentence),
             "source": source_name,
             "tagged": tagged_sentence,
-            "rhyme_sound": rhyme_sound(tagged_sentence),
+            "rhyme_sound": nlp.rhyme_sound(tagged_sentence),
             "phonemes": phonemes,
-            "num_syllables": count_syllables(tagged_sentence),
+            "num_syllables": nlp.count_syllables(tagged_sentence),
             "line_no": line_no,
-            "raw": tagged_sentence_to_string(tagged_sentence),}
+            "raw": nlp.untag_sentence(tagged_sentence),
+    }
 
 def process_text(raw_text, source_name, db):
     print("extracting sentences...")
     sentences = nlp.sentences(raw_text)
 
     print("tagging sentences...")
-    tagged_sentences = list(map(tag, sentences))
+    tagged_sentences = list(map(nlp.tag, sentences))
 
     print("expanding clauses...")
-    tagged_sentences = expand_multiclause(tagged_sentences)
+    tagged_sentences = nlp.expand_multiclauses(tagged_sentences)
 
     print("parsing and saving sentences...")
     for x in range(0, len(tagged_sentences)):
@@ -55,4 +48,3 @@ def process_text(raw_text, source_name, db):
         save(db, data)
 
     print("done")
-

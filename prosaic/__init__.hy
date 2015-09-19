@@ -15,7 +15,7 @@
 
 ;; These are here so this file can be used to programmatically include
 ;; the various prosaic modules
-;; (eg (import [prosaic.nyarlathotep [process-txt!]]))
+;; (eg (import [prosaic.nyarlathotep [process_text]]))
 ;;(import prosaic.util)
 ;;(import prosaic.cthulhu)
 ;;(import prosaic.nyarlathotep)
@@ -32,7 +32,7 @@
 (import [sh [rm cp mkdir]])
 (import [pymongo [MongoClient]])
 
-(import [prosaic.nyarlathotep [process-txt!]])
+(import [prosaic.nyarlathotep [process_text]])
 (import [prosaic.cthulhu [poem-from-template]])
 
 (def DEFAULT-HOST "localhost")
@@ -107,7 +107,7 @@
   (let [[db (args->db parsed-args)]
         [path (. parsed-args path)]
         [txt (slurp path)]]
-    (process-txt! txt path db)))
+    (process_text txt path db)))
 
 (defn corpus-ls* [parsed-args]
   (let [[mc (args->mclient parsed-args)]]
