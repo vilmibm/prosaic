@@ -13,6 +13,8 @@
 ;   You should have received a copy of the GNU General Public License
 ;   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+(import [random [choice]])
+
 (require hy.contrib.loop)
 (loop [[x nil]] x) ; this is here to fix a threading / sys.modules issue
 
@@ -22,11 +24,10 @@
 (import [json [loads]])
 (import sys)
 
-(import [dogma [keyword-rule
-                fuzzy-keyword-rule
-                rhyme-rule
-                syllable-count-rule]])
-(import [util [random-nth]])
+(import [dogma [KeywordRule
+                FuzzyKeywordRule
+                RhymeRule
+                SyllableCountRule]])
 
 ; # General Utility
 (defn pluck [col-of-dicts key]
@@ -46,12 +47,12 @@
    [__init__ (fn [self rules]
                (setv (. self rules) rules)
                nil)]
-   [to-query (fn [self]
+   [to_query (fn [self]
                (->> (. self rules)
-                    (map (fn [r] (.to-query r)))
+                    (map (fn [r] (.to_query r)))
                     (reduce merge!)))]
-   [weaken! (fn [self]
-              (.weaken! (random-nth (. self rules)))
+   [weaken (fn [self]
+              (.weaken (choice (. self rules)))
               self)]])
 
 (defn build-sound-cache [db]
@@ -65,17 +66,17 @@
                        sound-cache
                        (build-sound-cache db))]]
         (->> letters
-             (map (fn [l] [l (random-nth sounds)]))
+             (map (fn [l] [l (choice sounds)]))
              dict)))))
 
 (defn extract-rule [db l->s raw-pair]
   (let [[type (first raw-pair)]
         [arg  (second raw-pair)]]
     (cond
-     [(= type "rhyme") (rhyme-rule (.get l->s arg))]
-     [(= type "keyword") (keyword-rule arg db)]
-     [(= type "syllables") (syllable-count-rule arg)]
-     [(= type "fuzzy") (fuzzy-keyword-rule arg db)])))
+     [(= type "rhyme") (RhymeRule (.get l->s arg))]
+     [(= type "keyword") (KeywordRule arg db)]
+     [(= type "syllables") (SyllableCountRule arg)]
+     [(= type "fuzzy") (FuzzyKeywordRule arg db)])))
 
 ;; need to transform dictionary -> list of rules
 (defn extract-ruleset [db letters->sounds tmpl-line]
@@ -92,12 +93,12 @@
 
 (defn ruleset->line [db ruleset]
   (loop [[line nil] [r ruleset]]
-        (let [[query (.to-query r)]
+        (let [[query (.to_query r)]
               [lines (list (.find db query))]]
           (if (empty? lines)
-            (recur nil (.weaken! ruleset))
+            (recur nil (.weaken ruleset))
             (do
-             (random-nth lines))))))
+             (choice lines))))))
 
 ; # Main entry point
 (defn poem-from-template [template db &optional sound-cache]
