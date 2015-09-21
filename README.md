@@ -11,18 +11,13 @@ being a prose scraper & poetry generator
 
 by [nathanielksmith](http://chiptheglasses.com)
 
-written in [hy](http://hylang.org)
-
 using [nltk](http://nltk.org)
-
-(formerly written with
-[nodejs](https://github.com/nathanielksmith/node-prosaic))
 
 and licensed under the [GPL](https://www.gnu.org/copyleft/gpl.html).
 
 ## notes
 
-the setup.py works, but beware that you still have to manually run the hy \_\_init\_\_.hy script. The workflow I use is:
+the setup.py works, but i haven't put it on pypi yet / set up entry points. my workflow:
 
  * install python-dev(el), whatever makes sense for your platform
  * clone this repo
@@ -33,22 +28,20 @@ the setup.py works, but beware that you still have to manually run the hy \_\_in
 
 (obviously you are welcome to put the venv wherever).
 
-        hy __init__.hy corpus loadfile -d some_mongo_db_name some_file0.txt
-        hy __init__.hy corpus loadfile -d some_mongo_db_name some_file1.txt
-        hy __init__.hy corpus loadfile -d some_mongo_db_name some_file2.txt
+        python __init__.py corpus loadfile -d some_mongo_db_name some_file0.txt
+        python __init__.py corpus loadfile -d some_mongo_db_name some_file1.txt
+        python __init__.py corpus loadfile -d some_mongo_db_name some_file2.txt
 
-        hy __init__.hy poem new -t haiku -d some_mongo_db_name
+        python __init__.py poem new -t haiku -d some_mongo_db_name
 
-one can also do this programmatically from either python (you'll need
-to compile all of the hy with hyc first) or hy; import
-`prosaic.cthulhu.poem-from-template` to create poems or
-`prosaic.nyarlathotep.process-text!` to parse text and make
-corpora. There are no docs. read the source or look at `cthtest.hy`
-for some example usage.
+one can also do this programmatically from either python. Import
+`prosaic.cthulhu.poem_from_template` to create poems or
+`prosaic.nyarlathotep.process_text` to parse text and make
+corpora. There are no docs, yet, and i'm sorry.
 
 ## working with templates
 
-a few sample poem templates are included with `prosaic`. you can check them out with `hy __init__.hy template ls` and then `hy __init__.hy template edit <template name>`. make your own with `hy __init__.hy template new <template name>`. templates are stored in `~/.prosaic`.
+a few sample poem templates are included with `prosaic`. you can check them out with `python __init__.py template ls` and then `python __init__.py template edit <template name>`. make your own with `python __init__.py template new <template name>`. templates are stored in `~/.prosaic`.
 
 ### how does prosaic work?
 
@@ -76,15 +69,9 @@ are, of course, welcome to use prosaic however you see fit.
 
 ### changelog
 
+ * 3.0.0 - lateral port to python (sorry [hy](http://hylang.org)), but there are some breaking naming changes.
  * 2.0.0 - shiny new CLI UI. run `hy __init__.hy -h` to see/explore the subcommands.
  * 1.0.0 - it works
-
-### why hy?
-
-I am returning to the world of Python after a long and strange sojourn
-that included a lot of Clojure. I love Python and the Python community
-but my brain thinks in s expressions, now. I find Hy to be useful,
-fun, and highly compatible with my brain.
 
 ### why mongodb?
 
