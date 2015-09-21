@@ -1,2 +1,1 @@
-recursive-include prosaic *.hy
 recursive-include prosaic/templates *
