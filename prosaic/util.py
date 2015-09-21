@@ -57,3 +57,7 @@ def threaded(*fns):
             value = fn(value)
         return value
     return threaded_fun
+
+def slurp(filename):
+    with open(filename) as f:
+        return "".join(map(lambda s: s.replace("\r\n", " "), f.readlines()))
