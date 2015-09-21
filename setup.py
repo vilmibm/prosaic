@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='prosaic',
-    version='2.0.0',
+    version='3.0.0',
     description='prose scraper & cut-up poetry generator',
     url='https://github.com/nathanielksmith/prosaic',
     author='vilmibm shaksfrpease',
@@ -18,7 +18,7 @@ setup(
     ],
     keywords='poetry',
     packages=['prosaic'],
-    install_requires = ['pymongo==2.7.2', 'hy==0.10.0', 'nltk==3.0.0', 'numpy==1.9.0', 'sh==1.11'],
+    install_requires = ['pymongo==2.7.2', 'nltk==3.0.0', 'numpy==1.9.0', 'sh==1.11'],
     include_package_data = True,
     # TODO entry points
 )
