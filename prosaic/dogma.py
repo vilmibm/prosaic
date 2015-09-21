@@ -12,12 +12,12 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+from functools import reduce
 from random import choice
 import re
 
 import nlp
-from util import match, is_empty
+from util import match, is_empty, update
 
 class Rule:
     strength = 0
@@ -128,3 +128,15 @@ class RhymeRule(Rule):
             query = {'rhyme_sound': self.next_sound()}
 
         return query
+
+class RuleSet:
+    def __init__(self, rules):
+        self.rules = rules
+
+    def to_query(self):
+        return reduce(update, map(lambda r: r.to_query(), self.rules))
+
+    def weaken(self):
+        choice(self.rules).weaken()
+        return self
+

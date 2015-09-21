@@ -36,3 +36,24 @@ def compose(f, g):
     return composed_fun
 
 some = compose(any, map)
+
+def pluck(dict_list, key):
+    return list(map(lambda d: d.get(key), dict_list))
+
+def update(d0, d1):
+    d0.update(d1)
+    return d0
+
+def thread(initial, *fns):
+    value = initial
+    for fn in fns:
+        value = fn(value)
+    return value
+
+def threaded(*fns):
+    def threaded_fun(*args, **kwargs):
+        value = fns[0](*args, **kwargs)
+        for fn in fns[1:]:
+            value = fn(value)
+        return value
+    return threaded_fun
