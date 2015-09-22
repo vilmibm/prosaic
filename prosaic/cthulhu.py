@@ -20,8 +20,8 @@ from random import choice
 from json import loads
 import sys
 
-import dogma
-from util import pluck, is_empty, threaded, first, second
+import prosaic.dogma as dogma
+from prosaic.util import pluck, is_empty, threaded, first, second
 
 def build_sound_cache(db):
     return db.find().distinct("rhyme_sound")

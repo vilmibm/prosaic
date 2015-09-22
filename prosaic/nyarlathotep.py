@@ -12,8 +12,8 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import nlp
-from util import first
+import prosaic.nlp as nlp
+from prosaic.util import first
 
 def save(db, data):
     return db.insert(data)

@@ -20,5 +20,9 @@ setup(
     packages=['prosaic'],
     install_requires = ['pymongo==2.7.2', 'nltk==3.0.0', 'numpy==1.9.0', 'sh==1.11'],
     include_package_data = True,
-    # TODO entry points
+    entry_points = {
+          'console_scripts': [
+              'prosaic = prosaic.__init__:main'
+          ]
+    },
 )

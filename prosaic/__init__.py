@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # This program is part of prosaic.
 
 # This program is free software: you can redistribute it and/or modify
@@ -18,8 +19,8 @@ from os.path import join, exists, dirname
 
 from sh import cp, mkdir
 
-import commands as cmd
-from cfg import PROSAIC_HOME, TEMPLATES, MONGO_HOST, MONGO_PORT, DEFAULT_DB
+import prosaic.commands as cmd
+from prosaic.cfg import PROSAIC_HOME, TEMPLATES, MONGO_HOST, MONGO_PORT, DEFAULT_DB
 
 # TODO for love of god put this in readme, not here:
 ## CLI UI

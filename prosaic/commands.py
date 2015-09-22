@@ -20,10 +20,10 @@ from subprocess import call
 from pymongo import MongoClient
 from sh import rm, cp
 
-from nyarlathotep import process_text
-from cthulhu import poem_from_template
-from cfg import DEFAULT_TEMPLATE_EXT, TEMPLATES, EXAMPLE_TEMPLATE
-from util import slurp
+from prosaic.nyarlathotep import process_text
+from prosaic.cthulhu import poem_from_template
+from prosaic.cfg import DEFAULT_TEMPLATE_EXT, TEMPLATES, EXAMPLE_TEMPLATE
+from prosaic.util import slurp
 
 # TODO refactor all of this stuff to be in the ProsaicArgParser class.
 

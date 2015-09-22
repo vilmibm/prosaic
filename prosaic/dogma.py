@@ -16,8 +16,8 @@ from functools import reduce
 from random import choice
 import re
 
-import nlp
-from util import match, is_empty, update
+import prosaic.nlp as nlp
+from prosaic.util import match, is_empty, update
 
 class Rule:
     strength = 0
