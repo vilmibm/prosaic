@@ -1,2 +1,5 @@
 penv/*
 prosaic/__pycache__
+dist
+prosaic.egg-info
+
