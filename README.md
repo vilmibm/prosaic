@@ -160,4 +160,6 @@ HA/consistency, and a well defined document structure.
 * [chiptheglasses](http://chiptheglasses.com/tag/poem.html), poetry by Nathaniel Smith, including many prosaic works.
 * [Dada Manifesto On Feeble Love And Bitter Love](http://www.391.org/manifestos/1920-dada-manifesto-feeble-love-bitter-love-tristan-tzara.html) by Tristan Tzara, 1920.
 * [Prosaic on Gnoetry Daily](https://gnoetrydaily.wordpress.com/tag/prosaic/). Blog of computer poetry featuring some prosaic-generated works.
+* [Lovecraft plaintext corpus](https://github.com/nathanielksmith/lovecraftcorpus). Most of H.P. Lovecraft's bibliography in plain text for cutting up.
+* [Project Gutenberg](http://www.gutenberg.org/). Lots and lots of public domain books in plaintext.
 
