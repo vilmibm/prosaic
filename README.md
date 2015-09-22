@@ -72,7 +72,7 @@ a poem line by line.
         from prosaic.nyarlathotep import process_text
         from prosaic.cthulhu import poem_from_template
 
-        db = MongoClient().my_corpus_db
+        db = MongoClient().my_corpus_db.phrases
         process_text("some very long string of text", "a name for this long string of text", db)
         print(poem_from_template([{'syllables': 5}, {'syllables':7}, {'syllables':5}], db))
 
@@ -82,11 +82,13 @@ Templates are currently stored as json files (or passed from within code as
 python dictionaries) that represent an array of json objects, each one
 containing describing a line of poetry.
 
+A template describes a "desired" poem. Prosaic uses the template to approximate a piece given what text it has in its database. Running prosaic repeatedly with the same template will almost always yield different results.
+
 You can see available templates with `prosaic template ls`, edit them with `prosaic template edit <template name>`, and add your own with `prosaic template new <template name>`.
 
 The rules available are:
 
-* _syllables_: integer number of syllables you'd line on a line
+* _syllables_: integer number of syllables you'd like on a line
 * _keyword_: string containing a word you want to see on a line
 * _fuzzy_: you want to see a line that happens near a source sentence that has this string keyword.
 * _rhyme_: define a rhyme scheme. For example, a couplet template would be:
