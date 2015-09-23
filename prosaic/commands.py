@@ -59,6 +59,7 @@ class ProsaicArgParser(ArgumentParser):
             template_path = ''.join(self.args.infile.readlines())
         else:
             template_path = self.read_template(self.args.tmpl)
+
         self._template = loads(template_path)
         return self._template
 
