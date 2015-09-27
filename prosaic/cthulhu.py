@@ -41,6 +41,7 @@ def extract_rule(db, letter_sound_map, raw_pair):
     rule = None
 
     if rule_key == 'rhyme': rule = dogma.RhymeRule(letter_sound_map.get(value))
+    elif rule_key == 'alliteration': rule = dogma.AlliterationRule(value)
     elif rule_key == 'keyword': rule = dogma.KeywordRule(value, db)
     elif rule_key == 'fuzzy': rule = dogma.FuzzyKeywordRule(value, db)
     elif rule_key == 'syllables': rule = dogma.SyllableCountRule(value)

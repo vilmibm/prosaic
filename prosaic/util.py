@@ -61,3 +61,6 @@ def threaded(*fns):
 def slurp(filename):
     with open(filename) as f:
         return "".join(map(lambda s: s.replace("\r\n", " "), f.readlines()))
+
+def find_first(predicate, xs):
+    return next(filter(predicate, xs), None)

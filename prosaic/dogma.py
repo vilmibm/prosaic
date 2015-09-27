@@ -129,6 +129,20 @@ class RhymeRule(Rule):
 
         return query
 
+class AlliterationRule(Rule):
+    __slots__ = ['strength', 'which']
+    def __init__(self, which):
+        self.strength = 1
+        self.which = which
+
+    def to_query(self):
+        if 0 == self.strength:
+            query = super().to_query()
+        else:
+            query = {'alliteration': self.which}
+
+        return query
+
 class RuleSet:
     def __init__(self, rules):
         self.rules = rules

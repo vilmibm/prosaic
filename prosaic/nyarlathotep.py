@@ -28,6 +28,7 @@ def process_sentence(tagged_sentence, source_name, line_no):
             "phonemes": phonemes,
             "num_syllables": nlp.count_syllables(tagged_sentence),
             "line_no": line_no,
+            "alliteration": nlp.has_alliteration(tagged_sentence),
             "raw": nlp.untag_sentence(tagged_sentence),
     }
 

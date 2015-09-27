@@ -18,7 +18,7 @@ import re
 import sys
 from os.path import join, expanduser, exists
 import nltk
-from prosaic.util import match, invert, first, compose, second, some, is_empty, last
+from prosaic.util import match, invert, first, compose, second, some, is_empty, last, find_first
 
 # We have to pause our imports, here, to do some NLTK prep. We can't import
 # certain things until we've downloaded raw corpora and other data, so we do so
@@ -49,10 +49,12 @@ cmudict_dict = cmudict.dict()
 # Some useful regexes:
 vowel_re = re.compile("[aeiouAEIOU]")
 vowel_phoneme_re = re.compile("AA|AE|AH|AO|AW|AY|EH|EY|ER|IH|IY|OW|OY|UH|UW")
+consonant_phoneme_re = re.compile("^(?:B|D|G|JH|L|N|P|S|T|V|Y|ZH|CH|DH|F|HH|K|M|NG|R|SH|TH|W|Z)")
 
 # Helper predicates:
 is_vowel = partial(match, vowel_re)
 is_vowel_phoneme = partial(match, vowel_phoneme_re)
+is_consonant_phoneme = partial(match, consonant_phoneme_re)
 
 def word_to_phonemes(word):
     result = cmudict_dict.get(word.lower(), None)
@@ -72,8 +74,8 @@ def tag(sentence_string):
     tokenized_words = nltk.word_tokenize(sentence_string)
     return nltk.pos_tag(tokenized_words)
 
-def stem_sentence(tagged_sentences):
-    stemmed = map(compose(stem_word, first), tagged_sentences)
+def stem_sentence(tagged_sentence):
+    stemmed = map(compose(stem_word, first), tagged_sentence)
     return list(stemmed)
 
 is_divider = lambda tu: DIVIDER_TAG == second(tu)
@@ -146,3 +148,27 @@ def rhyme_sound(tagged_sentence):
         return None
 
     return "".join(phonemes[-3:])
+
+consonant_re = re.compile("(SH|CH|TH|B|D|G|L|N|P|S|T|V|Y|F|K|M|NG|R|W|Z)")
+def has_alliteration(tagged_sentence):
+    words = untag_sentence(tagged_sentence).split(' ')
+
+    def first_consonant_sound(word):
+        phonemes = word_to_phonemes(word)
+        if not is_empty(phonemes):
+            return find_first(is_consonant_phoneme, phonemes)
+        else:
+            return first(consonant_re.findall(word.upper()))
+
+    first_consonant_phonemes = map(first_consonant_sound, words)
+    last_phoneme = None
+    for phoneme in first_consonant_phonemes:
+        if last_phoneme is None:
+            last_phoneme = phoneme
+        else:
+            if last_phoneme == phoneme:
+                return True
+            else:
+                last_phoneme = phoneme
+    return False
+

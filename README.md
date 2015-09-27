@@ -89,6 +89,7 @@ You can see available templates with `prosaic template ls`, edit them with `pros
 The rules available are:
 
 * _syllables_: integer number of syllables you'd like on a line
+* _alliteration_: true or false; whether you'd like to see alliteration on a line
 * _keyword_: string containing a word you want to see on a line
 * _fuzzy_: you want to see a line that happens near a source sentence that has this string keyword.
 * _rhyme_: define a rhyme scheme. For example, a couplet template would be:
