@@ -21,15 +21,16 @@ def save(db, data):
 def process_sentence(tagged_sentence, source_name, line_no):
     words = map(first, tagged_sentence)
     phonemes = list(map(nlp.word_to_phonemes, words))
-    return {"stems": nlp.stem_sentence(tagged_sentence),
-            "source": source_name,
-            "tagged": tagged_sentence,
-            "rhyme_sound": nlp.rhyme_sound(tagged_sentence),
-            "phonemes": phonemes,
-            "num_syllables": nlp.count_syllables(tagged_sentence),
-            "line_no": line_no,
-            "alliteration": nlp.has_alliteration(tagged_sentence),
-            "raw": nlp.untag_sentence(tagged_sentence),
+    return {'stems': nlp.stem_sentence(tagged_sentence),
+            'source': source_name,
+            'tagged': tagged_sentence,
+            'rhyme_sound': nlp.rhyme_sound(tagged_sentence),
+            'phonemes': phonemes,
+            'num_syllables': nlp.count_syllables(tagged_sentence),
+            'line_no': line_no,
+            'alliteration': nlp.has_alliteration(tagged_sentence),
+            'raw': nlp.untag_sentence(tagged_sentence),
+            'blank': False,
     }
 
 def process_text(raw_text, source_name, db):

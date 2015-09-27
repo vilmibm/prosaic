@@ -57,9 +57,10 @@ class TestCorpusCommands:
 
 class TestPoemCommands:
     def test_new_with_template(self, env, client):
+        # tests template choosing, blank rule
         prosaic('corpus', 'loadfile', '-dprosaic_test', TEST_CORPUS_PATH)
         out = prosaic('poem', 'new', '-tsonnet', '-dprosaic_test')
-        assert len(out.split('\n')) > 10
+        assert len(out.split('\n')) >= 17
 
     def test_new_with_default(self, env):
         out = prosaic('poem', 'new', '-dprosaic_test')

@@ -30,7 +30,7 @@ class Rule:
         # Typically there would be a cond over (. self
         # strength) here, but this base class represents the
         # trivial rule.
-        return {}
+        return {'blank': False}
 
 class SyllableCountRule(Rule):
     __slots__ = ['syllables', 'strength',]
@@ -142,6 +142,18 @@ class AlliterationRule(Rule):
             query = {'alliteration': self.which}
 
         return query
+
+class BlankRule(Rule):
+    __slots__ = ['strength', 'db']
+    def __init__(self, db):
+        self.strength = 0
+        self.db = db
+
+    def to_query(self):
+        if self.db.find({'blank': True}).count() == 0:
+            self.db.insert({'blank': True, 'raw': '',})
+
+        return {'blank': True}
 
 class RuleSet:
     def __init__(self, rules):

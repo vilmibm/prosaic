@@ -1,19 +1,19 @@
 [
-  {"rhyme":"A"},
-  {"rhyme":"B"},
-  {"rhyme":"A"},
-  {"rhyme":"B"},
-
-  {"rhyme":"C"},
-  {"rhyme":"D"},
-  {"rhyme":"C"},
-  {"rhyme":"D"},
-
-  {"rhyme":"E"},
-  {"rhyme":"F"},
-  {"rhyme":"E"},
-  {"rhyme":"F"},
-
-  {"rhyme":"G"},
-  {"rhyme":"G"}
+    {"rhyme":"A", "syllables": 10},
+    {"rhyme":"B", "syllables": 12},
+    {"rhyme":"A", "syllables": 11},
+    {"rhyme":"B", "syllables": 13},
+    {"blank": true},
+    {"rhyme":"C", "syllables": 10},
+    {"rhyme":"D", "syllables": 12},
+    {"rhyme":"C", "syllables": 11},
+    {"rhyme":"D", "syllables": 13},
+    {"blank": true},
+    {"rhyme":"E", "syllables": 10},
+    {"rhyme":"F", "syllables": 12},
+    {"rhyme":"E", "syllables": 11},
+    {"rhyme":"F", "syllables": 13},
+    {"blank":true},
+    {"rhyme":"G", "syllables": 12},
+    {"rhyme":"G", "syllables": 10}
 ]

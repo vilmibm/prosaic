@@ -89,11 +89,12 @@ You can see available templates with `prosaic template ls`, edit them with `pros
 The rules available are:
 
 * _syllables_: integer number of syllables you'd like on a line
-* _alliteration_: true or false; whether you'd like to see alliteration on a line
+* _alliteration_: `true` or `false`; whether you'd like to see alliteration on a line
 * _keyword_: string containing a word you want to see on a line
 * _fuzzy_: you want to see a line that happens near a source sentence that has this string keyword.
 * _rhyme_: define a rhyme scheme. For example, a couplet template would be:
   `[{"rhyme":"A", "rhyme":"A"}]`
+* _blank_: if set to `true`, makes a blank line in the output. for making stanzas.
 
 ## example template
 
@@ -142,6 +143,7 @@ are, of course, welcome to use prosaic however you see fit.
 
 ## changelog
 
+ * 3.3.0 - blank rule; can now add blank lines to output for marking stanzas.
  * 3.2.0 - alliteration support!
  * 3.1.0 - can now install prosaic as a command line tool!! also docs!
  * 3.0.0 - lateral port to python (sorry [hy](http://hylang.org)), but there are some breaking naming changes.
