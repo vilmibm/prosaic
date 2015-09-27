@@ -95,8 +95,9 @@ def expand_multiclauses(tagged_sentences):
             split += split_multiclause(tagged_sentence)
     return split
 
-# TODO this is dumb. just store the original sentence.
-punctuation_regex = re.compile("^[^a-zA-Z]")
+# TODO Ideally we'd store the original sentence along with the tagged version,
+# but that gets slightly hard with multiclause expansion.
+punctuation_regex = re.compile("^[^a-zA-Z0-9]")
 
 @lru_cache(maxsize=256)
 def match_punctuation(string):
