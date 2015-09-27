@@ -142,6 +142,7 @@ are, of course, welcome to use prosaic however you see fit.
 
 ## changelog
 
+ * 3.2.0 - alliteration support!
  * 3.1.0 - can now install prosaic as a command line tool!! also docs!
  * 3.0.0 - lateral port to python (sorry [hy](http://hylang.org)), but there are some breaking naming changes.
  * 2.0.0 - shiny new CLI UI. run `hy __init__.hy -h` to see/explore the subcommands.
