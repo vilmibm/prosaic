@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='prosaic',
-    version='3.1.0',
+    version='3.2.0',
     description='prose scraper & cut-up poetry generator',
     url='https://github.com/nathanielksmith/prosaic',
     author='vilmibm shaksfrpease',
