@@ -151,7 +151,7 @@ class ProsaicArgParser(ArgumentParser):
         # TODO try catch
         try:
             self.args.func()
-        except AttributeError:
+        except AttributeError as e:
             self.print_help()
             return 1
 
