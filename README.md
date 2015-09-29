@@ -143,6 +143,7 @@ are, of course, welcome to use prosaic however you see fit.
 
 ## changelog
 
+ * 3.4.0 - flurry of improvements to text pre-processing which makes output much cleaner.
  * 3.3.0 - blank rule; can now add blank lines to output for marking stanzas.
  * 3.2.0 - alliteration support!
  * 3.1.0 - can now install prosaic as a command line tool!! also docs!
