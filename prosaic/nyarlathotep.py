@@ -12,41 +12,67 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import re
 import prosaic.nlp as nlp
 from prosaic.util import first
 
 def save(db, data):
     return db.insert(data)
 
-def process_sentence(tagged_sentence, source_name, line_no):
-    words = map(first, tagged_sentence)
-    phonemes = list(map(nlp.word_to_phonemes, words))
-    return {'stems': nlp.stem_sentence(tagged_sentence),
+def process_sentence(sentence, source_name, line_no):
+    phonemes = list(map(nlp.word_to_phonemes, nlp.words(sentence)))
+    return {'stems': nlp.stem_sentence(sentence),
             'source': source_name,
-            'tagged': tagged_sentence,
-            'rhyme_sound': nlp.rhyme_sound(tagged_sentence),
+            'tagged': nlp.tag(sentence),
+            'rhyme_sound': nlp.rhyme_sound(sentence),
             'phonemes': phonemes,
-            'num_syllables': nlp.count_syllables(tagged_sentence),
+            'num_syllables': nlp.count_syllables(sentence),
             'line_no': line_no,
-            'alliteration': nlp.has_alliteration(tagged_sentence),
-            'raw': nlp.untag_sentence(tagged_sentence),
+            'alliteration': nlp.has_alliteration(sentence),
+            'raw': sentence,
             'blank': False,
     }
 
+collapse_whitespace_re = re.compile("\s+")
+def pre_process_text(raw_text):
+    raw_text = re.sub(collapse_whitespace_re, ' ', raw_text)
+    # TODO anything else?
+    return raw_text
+
+pairs = [('{', '}'), ('(', ')'), ('[', ']')]
+bad_substrings = ['`', '“', '”', '«', '»', "''"]
+
+def pre_process_sentence(sentence):
+
+    if sentence.count('"') == 1:
+        sentence = sentence.replace('"', '')
+
+    # TODO bootleg
+    for l,r in pairs:
+        if sentence.count(l) == 1 and sentence.count(r) == 0:
+            sentence = sentence.replace(l, '')
+        if sentence.count(r) == 1 and sentence.count(l) == 0:
+            sentence = sentence.replace(r, '')
+
+    for substring in bad_substrings:
+       sentence = sentence.replace(substring, '')
+
+    return sentence.rstrip().lstrip()
+
 def process_text(raw_text, source_name, db):
+    print('pre-processing text...')
+    raw_text = pre_process_text(raw_text)
+
     print("extracting sentences...")
     sentences = nlp.sentences(raw_text)
 
-    print("tagging sentences...")
-    tagged_sentences = list(map(nlp.tag, sentences))
-
     print("expanding clauses...")
-    tagged_sentences = nlp.expand_multiclauses(tagged_sentences)
+    sentences = nlp.expand_multiclauses(sentences)
 
-    print("parsing and saving sentences...")
-    for x in range(0, len(tagged_sentences)):
-        tagged_sentence = tagged_sentences[x]
-        data = process_sentence(tagged_sentence, source_name, x)
+    print("pre-processing, parsing and saving sentences...")
+    for x in range(0, len(sentences)):
+        sentence = pre_process_sentence(sentences[x])
+        data = process_sentence(sentence, source_name, x)
         save(db, data)
 
     print("done")

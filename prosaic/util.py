@@ -15,11 +15,19 @@
 from functools import lru_cache
 import re
 
-first = lambda l: l[0] if len(l) > 0 else None
-second = lambda l: l[1] if len(l) > 1 else None
 plus = lambda x,y: x + y
 is_empty = lambda l: 0 == len(l)
 last = lambda l: l[-1] if not is_empty(l) else None
+
+def first(xs):
+    if xs is None or len(xs) < 1:
+        return None
+    return xs[0]
+
+def second(xs):
+    if xs is None or len(xs) < 2:
+        return None
+    return xs[1]
 
 @lru_cache(maxsize=256)
 def match(regex, string):

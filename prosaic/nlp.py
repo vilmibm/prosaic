@@ -70,31 +70,42 @@ sentences = lambda raw_text: tokenizer.tokenize(raw_text)
 def stem_word(word):
     return stemmer.stem(word)
 
+@lru_cache(maxsize=2056)
 def tag(sentence_string):
     tokenized_words = nltk.word_tokenize(sentence_string)
     return nltk.pos_tag(tokenized_words)
 
-def stem_sentence(tagged_sentence):
-    stemmed = map(compose(stem_word, first), tagged_sentence)
+word_tag_re = re.compile("^[A-Z]+$")
+@lru_cache(maxsize=2056)
+def words(sentence):
+    tagged_sentence = tag(sentence)
+    tagged_words = filter(lambda tu: match(word_tag_re, second(tu)), tagged_sentence)
+    ws = map(first, tagged_words)
+    return list(ws)
+
+def stem_sentence(sentence):
+    stemmed = map(stem_word, words(sentence))
     return list(stemmed)
 
 is_divider = lambda tu: DIVIDER_TAG == second(tu)
 
-def split_multiclause(tagged_sentence):
-    if some(is_divider, tagged_sentence):
-        pred = invert(is_divider)
-        first_clause = list(takewhile(pred, tagged_sentence))
-        second_clause = list(dropwhile(pred, tagged_sentence))
+def split_multiclause(sentence, tagged_sentence):
+    # extract the text the divider tag represents
+    divider = first(find_first(is_divider, tagged_sentence))
+    if divider is not None:
+        first_clause = sentence[0:sentence.index(divider)].rstrip()
+        second_clause = sentence[sentence.index(divider)+1:].lstrip()
         return [first_clause, second_clause]
     else:
-        return [tagged_sentence]
+        return [sentence]
 
-def expand_multiclauses(tagged_sentences):
+def expand_multiclauses(sentences):
     # TODO consider itertools
     split = []
-    for tagged_sentence in tagged_sentences:
+    for sentence in sentences:
+        tagged_sentence = tag(sentence)
         if not is_empty(tagged_sentence):
-            split += split_multiclause(tagged_sentence)
+            split += split_multiclause(sentence, tagged_sentence)
     return split
 
 # TODO Ideally we'd store the original sentence along with the tagged version,
@@ -104,16 +115,6 @@ punctuation_regex = re.compile("^[^a-zA-Z0-9]")
 @lru_cache(maxsize=256)
 def match_punctuation(string):
     return match(punctuation_regex, string)
-
-def untag_sentence(tagged_sentence):
-    """Takes a tagged sentence; returns it as a plain string."""
-    output = ""
-    for tu in tagged_sentence:
-        if not is_empty(tu):
-            text = first(tu)
-            output += (" " + text) if not match(punctuation_regex, text) else text
-
-    return output
 
 def count_syllables_in_word(word):
     phonemes = word_to_phonemes(word)
@@ -126,22 +127,22 @@ def count_syllables_in_word(word):
 
     return len(list(vowel_things))
 
-def count_syllables(tagged_sentence):
-    syllable_counts = map(compose(count_syllables_in_word, first),
-                          tagged_sentence)
+def count_syllables(sentence):
+    syllable_counts = map(count_syllables_in_word, words(sentence))
     return sum(syllable_counts)
 
 alpha_tag = re.compile("^[a-zA-Z]")
 is_alpha_tag = partial(match, alpha_tag)
 
-def rhyme_sound(tagged_sentence):
+def rhyme_sound(sentence):
+    tagged_sentence = tag(sentence)
     without_punctuation = filter(compose(is_alpha_tag, second), tagged_sentence)
-    words = list(map(first, without_punctuation))
+    ws = list(map(first, without_punctuation))
 
-    if is_empty(words):
+    if is_empty(ws):
         return None
 
-    last_word = last(words)
+    last_word = last(ws)
     phonemes = word_to_phonemes(last_word)
 
     if is_empty(phonemes):
@@ -150,8 +151,9 @@ def rhyme_sound(tagged_sentence):
     return "".join(phonemes[-3:])
 
 consonant_re = re.compile("(SH|CH|TH|B|D|G|L|N|P|S|T|V|Y|F|K|M|NG|R|W|Z)")
-def has_alliteration(tagged_sentence):
-    words = untag_sentence(tagged_sentence).split(' ')
+
+def has_alliteration(sentence):
+    ws = words(sentence)
 
     def first_consonant_sound(word):
         phonemes = word_to_phonemes(word)
@@ -160,7 +162,7 @@ def has_alliteration(tagged_sentence):
         else:
             return first(consonant_re.findall(word.upper()))
 
-    first_consonant_phonemes = map(first_consonant_sound, words)
+    first_consonant_phonemes = map(first_consonant_sound, ws)
     last_phoneme = None
     for phoneme in first_consonant_phonemes:
         if last_phoneme is None:
