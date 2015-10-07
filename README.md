@@ -93,7 +93,7 @@ The rules available are:
 * _keyword_: string containing a word you want to see on a line
 * _fuzzy_: you want to see a line that happens near a source sentence that has this string keyword.
 * _rhyme_: define a rhyme scheme. For example, a couplet template would be:
-  `[{"rhyme":"A", "rhyme":"A"}]`
+  `[{"rhyme":"A"}, {"rhyme":"A"}]`
 * _blank_: if set to `true`, makes a blank line in the output. for making stanzas.
 
 ## example template
