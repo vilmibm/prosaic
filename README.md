@@ -26,7 +26,7 @@ a poem line by line.
 
 * mongodb 2.0+ (see explanation at bottom)
 * python 3.4+
-* linux (tested on debian and ubuntu) (in theory it should work on os x but i have not tested it)
+* linux (it has also been verified to work fine on osx)
 * you might need some -dev libraries to get nltk to compile
 
 ## quick start
