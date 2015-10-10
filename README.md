@@ -161,6 +161,7 @@ HA/consistency, and a well defined document structure.
 ## further reading
 
 * [Prosaic: A New Approach to Computer Poetry](http://www.amcircus.com/arts/prosaic-a-new-approach-to-computer-poetry.html) by Nathaniel Smith. American Circus, 2013
+* [Make poetry from your twitter account!](https://gist.github.com/LynnCo/8447965d98f8b434808e) by [@lynncyrin ](https://twitter.com/lynncyrin)
 * [The Cyberpunk Prophecies](http://cyberpunkprophecies.tumblr.com). Cut-up poetry collection made with prosaic using 31 cyberpunk novels.
 * [chiptheglasses](http://chiptheglasses.com/tag/poem.html), poetry by Nathaniel Smith, including many prosaic works.
 * [Dada Manifesto On Feeble Love And Bitter Love](http://www.391.org/manifestos/1920-dada-manifesto-feeble-love-bitter-love-tristan-tzara.html) by Tristan Tzara, 1920.
