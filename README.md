@@ -31,7 +31,7 @@ a poem line by line.
 
 ## quick start
 
-    $ pip install prosaic
+    $ sudo pip install prosaic
     $ prosaic corpus loadfile pride_and_prejudice.txt
     $ prosaic poem new
 
