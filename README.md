@@ -68,13 +68,20 @@ a poem line by line.
 
 ## use as a library
 
-        from pymongo import MongoClient
-        from prosaic.nyarlathotep import process_text
-        from prosaic.cthulhu import poem_from_template
+```python
+from pymongo import MongoClient
+from prosaic.nyarlathotep import process_text
+from prosaic.cthulhu import poem_from_template
 
-        db = MongoClient().my_corpus_db.phrases
-        process_text("some very long string of text", "a name for this long string of text", db)
-        print(poem_from_template([{'syllables': 5}, {'syllables':7}, {'syllables':5}], db))
+db = MongoClient().my_corpus_db.phrases
+process_text("some very long string of text", "a name for this long string of text", db)
+
+# poem_from_template returns raw line dictionaries from the database:
+poem_lines = poem_from_template([{'syllables': 5}, {'syllables':7}, {'syllables':5}], db)
+
+# pull raw text out of each line dictionary and print it:
+print(list(map(lambda l: l['raw'], poem_lines)))
+```
 
 ## write a template
 
