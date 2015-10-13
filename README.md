@@ -24,14 +24,14 @@ a poem line by line.
 
 ## prerequisites
 
-* mongodb (see explanation at bottom)
-* python 3
-* linux (in theory it should work on os x but i have not tested it)
+* mongodb 2.0+ (see explanation at bottom)
+* python 3.4+
+* linux (it has also been verified to work fine on osx)
 * you might need some -dev libraries to get nltk to compile
 
 ## quick start
 
-    $ pip install prosaic
+    $ sudo pip install prosaic
     $ prosaic corpus loadfile pride_and_prejudice.txt
     $ prosaic poem new
 
@@ -68,13 +68,20 @@ a poem line by line.
 
 ## use as a library
 
-        from pymongo import MongoClient
-        from prosaic.nyarlathotep import process_text
-        from prosaic.cthulhu import poem_from_template
+```python
+from pymongo import MongoClient
+from prosaic.nyarlathotep import process_text
+from prosaic.cthulhu import poem_from_template
 
-        db = MongoClient().my_corpus_db.phrases
-        process_text("some very long string of text", "a name for this long string of text", db)
-        print(poem_from_template([{'syllables': 5}, {'syllables':7}, {'syllables':5}], db))
+db = MongoClient().my_corpus_db.phrases
+process_text("some very long string of text", "a name for this long string of text", db)
+
+# poem_from_template returns raw line dictionaries from the database:
+poem_lines = poem_from_template([{'syllables': 5}, {'syllables':7}, {'syllables':5}], db)
+
+# pull raw text out of each line dictionary and print it:
+print(list(map(lambda l: l['raw'], poem_lines)))
+```
 
 ## write a template
 
@@ -93,7 +100,7 @@ The rules available are:
 * _keyword_: string containing a word you want to see on a line
 * _fuzzy_: you want to see a line that happens near a source sentence that has this string keyword.
 * _rhyme_: define a rhyme scheme. For example, a couplet template would be:
-  `[{"rhyme":"A", "rhyme":"A"}]`
+  `[{"rhyme":"A"}, {"rhyme":"A"}]`
 * _blank_: if set to `true`, makes a blank line in the output. for making stanzas.
 
 ## example template
@@ -171,6 +178,7 @@ HA/consistency, and a well defined document structure.
 ## further reading
 
 * [Prosaic: A New Approach to Computer Poetry](http://www.amcircus.com/arts/prosaic-a-new-approach-to-computer-poetry.html) by Nathaniel Smith. American Circus, 2013
+* [Make poetry from your twitter account!](https://gist.github.com/LynnCo/8447965d98f8b434808e) by [@lynncyrin ](https://twitter.com/lynncyrin)
 * [The Cyberpunk Prophecies](http://cyberpunkprophecies.tumblr.com). Cut-up poetry collection made with prosaic using 31 cyberpunk novels.
 * [chiptheglasses](http://chiptheglasses.com/tag/poem.html), poetry by Nathaniel Smith, including many prosaic works.
 * [Dada Manifesto On Feeble Love And Bitter Love](http://www.391.org/manifestos/1920-dada-manifesto-feeble-love-bitter-love-tristan-tzara.html) by Tristan Tzara, 1920.
