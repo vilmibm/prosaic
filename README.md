@@ -141,6 +141,16 @@ clean up any grammar / pronoun agreement from what prosaic
 emitted. the end result is a human-computer collaborative work. you
 are, of course, welcome to use prosaic however you see fit.
 
+## developing
+
+Patches are more than welcome if they come with tests. Tests should always be
+green in master; if not, please let me know! To run the tests:
+
+```bash
+cd test
+py.test
+```
+
 ## changelog
 
  * 3.4.0 - flurry of improvements to text pre-processing which makes output much cleaner.
