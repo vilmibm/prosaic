@@ -15,9 +15,9 @@
 from os import environ
 from os.path import expanduser, join
 
-MONGO_HOST = 'localhost'
-MONGO_PORT = 27017
-DEFAULT_DB = 'prosaic'
+MONGO_HOST = environ.get('PROSAIC_DBHOST', 'localhost')
+MONGO_PORT = int(envrion.get('PROSAIC_DBPORT', 27017))
+DEFAULT_DB = environ.get('PROSAIC_DBNAME', 'prosaic')
 PROSAIC_HOME = environ.get('PROSAIC_HOME', join(expanduser('~'), '.prosaic'))
 DEFAULT_TEMPLATE = 'haiku'
 # TODO support for hocon (.conf)
