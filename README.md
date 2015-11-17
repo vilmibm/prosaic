@@ -160,6 +160,7 @@ py.test
 
 ## changelog
 
+ * 3.5.0 - prosaic now respects environment variables PROSAIC\_DBNAME, PROSAIC\_DBPORT and PROSAIC\_DBHOST. These are used if not overriden from the command line. If neither environment variables nor CLI args are provided, static defaults are used (these are unchanged).
  * 3.4.0 - flurry of improvements to text pre-processing which makes output much cleaner.
  * 3.3.0 - blank rule; can now add blank lines to output for marking stanzas.
  * 3.2.0 - alliteration support!
