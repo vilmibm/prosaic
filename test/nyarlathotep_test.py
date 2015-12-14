@@ -32,6 +32,7 @@ def test_pre_process_sentences():
              ('(result of the contest)', '(result of the contest)'),
              ('result of the contest)', 'result of the contest'),
              ('result of the conte\\nst', 'result of the contest'),
+             ("result of the conte\\'st", "result of the conte'st"),
              ('puke"', 'puke'),
              ('“puke”', 'puke'),
              ('«vomit»', 'vomit')]
