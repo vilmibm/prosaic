@@ -16,7 +16,7 @@ from prosaic.nyarlathotep import pre_process_text, pre_process_sentence
 
 
 def test_pre_process_text():
-    assert pre_process_text("hello\n\n\n\nhow are    you\ni am fine") == "hello how are you i am fine"
+    assert pre_process_text("\nhello\n\n\n\nhow are    you\ni am fine\n\n") == " hello how are you i am fine "
 
 def test_pre_process_sentences():
     should = [(" hello, how are you''", "hello, how are you"),
@@ -31,6 +31,7 @@ def test_pre_process_sentences():
              ('(result of the contest', 'result of the contest'),
              ('(result of the contest)', '(result of the contest)'),
              ('result of the contest)', 'result of the contest'),
+             ('result of the conte\\nst', 'result of the contest'),
              ('puke"', 'puke'),
              ('“puke”', 'puke'),
              ('«vomit»', 'vomit')]

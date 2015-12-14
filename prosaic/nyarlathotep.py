@@ -40,7 +40,7 @@ def pre_process_text(raw_text):
     return raw_text
 
 pairs = [('{', '}'), ('(', ')'), ('[', ']')]
-bad_substrings = ['`', '“', '”', '«', '»', "''"]
+bad_substrings = ['`', '“', '”', '«', '»', "''", '\\n',]
 
 def pre_process_sentence(sentence):
 
