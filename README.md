@@ -160,6 +160,8 @@ py.test
 
 ## changelog
 
+ * 3.5.4 - update nltk dependence so prosaic works on python 3.5
+ * 3.5.3 - mysterious release i don't know
  * 3.5.2 - handle weird double escaping issues
  * 3.5.1 - fix stupid typo
  * 3.5.0 - prosaic now respects environment variables PROSAIC\_DBNAME, PROSAIC\_DBPORT and PROSAIC\_DBHOST. These are used if not overriden from the command line. If neither environment variables nor CLI args are provided, static defaults are used (these are unchanged).
