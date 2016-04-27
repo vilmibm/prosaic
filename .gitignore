@@ -4,4 +4,4 @@ test/__pycache__
 dist
 prosaic.egg-info
 .cache
-
+*.swp
