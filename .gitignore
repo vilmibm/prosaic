@@ -3,5 +3,6 @@ prosaic/__pycache__
 test/__pycache__
 dist
 prosaic.egg-info
+prosaicv
 .cache
 *.swp
