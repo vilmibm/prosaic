@@ -12,41 +12,56 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from sqlalchemy import create_engine, Engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Boolean
+from sqlalchemy.orm import relationship
+from sqlalchemy.engine import Engine
+from sqlalchemy.dialects.postgresql import ARRAY, TEXT, INTEGER
 from sqlalchemy.ext.declarative import declarative_base
 
 # TODO rebuild venv outside of prosaic src
 
-def db_engine(username: str, dbhost: str, dbname: str) -> Engine:
-    return "postgresql://{}@{}/{}".format(username, dbhost, dbname))
+def db_engine(username: str, password: str, dbhost: str, dbname: str) -> Engine:
+    return create_engine('postgresql://{}:{}@{}/{}'.format(username, password, dbhost, dbname))
 
 # TODO this is hardcoded, shouldn't be
-engine = db_engine("vilmibm", "localhost", "prosaic")
+engine = db_engine('vilmibm', 'foobar', 'localhost', 'prosaic')
 
-# TODO should this live here?
 Base = declarative_base()
 
 class Source(Base):
     __tablename__ = "sources"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    content = Column(String)
+    id = Column(INTEGER, primary_key=True)
+    name = Column(TEXT)
+    description = Column(TEXT)
+    content = Column(TEXT)
+
+    phrases = relationship('Phrase', back_populates='sources')
 
 class Phrase(Base):
-    ## stems: array of text
-    ## source: FK to sources
-    ## tagged: array of POS tags
-    ## rhyme_sound: text
-    ## phonemes: array of text
-    ## syllables: integer
-    ## line_no: integer
-    ## alliteration: bool
-    ## raw: text
-    ## blank: bool
-    pass
+    __tablename__ = "phrases"
+
+    id = Column(INTEGER, primary_key=True)
+    stems = Column(ARRAY(TEXT))
+    raw = Column(TEXT)
+    alliteration = Column(Boolean)
+    rhyme_sound = Column(TEXT)
+    phonemes = Column(ARRAY(TEXT))
+    syllables = Column(INTEGER)
+    line_no = Column(INTEGER)
+
+    source = relationship('Source', back_populates='phrases')
+
+    # TODO Need to think about this:
+    # tagged = Column(ARRAY(ARRAY(TEXT)))
+
+    def __repr__(self) -> str:
+        return "Phrase(raw='%s', source='%s')" % (self.raw, self.source.name)
 
 class Corpus(Base):
-    ## name: text
-    ## source: FK to sources
-    pass
+    __tablename__ = "corpora"
+
+    id = Column(INTEGER, primary_key=True)
+    name = Column(TEXT)
+
+    source = relationship('Source')
