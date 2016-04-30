@@ -19,33 +19,33 @@ from os.path import join
 from subprocess import call
 import sys
 
-from pymongo import MongoClient
 from sh import rm, cp
 
-from prosaic.nyarlathotep import process_text
+from prosaic.models import db_engine
+from prosaic.parsing import process_text
 from prosaic.cthulhu import poem_from_template
-from prosaic.cfg import DEFAULT_TEMPLATE_EXT, TEMPLATES, EXAMPLE_TEMPLATE, MONGO_HOST, MONGO_PORT, DEFAULT_DB
+from prosaic.cfg import DEFAULT_TEMPLATE_EXT, TEMPLATES, EXAMPLE_TEMPLATE, PG_HOST, PG_PORT, PG_USER, PG_PASS,DEFAULT_DB
 from prosaic.util import slurp
 
 class ProsaicArgParser(ArgumentParser):
     editor = environ.get('EDITOR')
     _template = None
-    _client = None
-
+    _db = None
 
     # Helpers and properties:
 
     @property
-    def client(self):
-        if not self.args:
-            return None
-        return self._client if self._client else MongoClient(self.args.host, self.args.port)
-
-    @property
     def db(self):
+        # TODO honor port
         if not self.args:
             return None
-        return self.client[self.args.dbname].phrases
+
+        args = self.args
+        if self._db:
+            return self._db
+
+        self._db = db_engine(args.user, args.password, args.host, args.dbname)
+        return self._db
 
     @property
     def template(self):
@@ -70,11 +70,19 @@ class ProsaicArgParser(ArgumentParser):
         return join(TEMPLATES, '{}.{}'.format(self.args.tmplname, DEFAULT_TEMPLATE_EXT))
 
     def add_dbhost(self):
-        self.add_argument('--host', action='store', default=MONGO_HOST)
+        self.add_argument('--host', action='store', default=PG_HOST)
+        return self
+
+    def add_dbpass(self):
+        self.add_argument('--password', action='store', default=PG_PASS)
+        return self
+
+    def add_dbuser(self):
+        self.add_argument('--user', action='store', default=PG_USER)
         return self
 
     def add_dbport(self):
-        self.add_argument('-p', '--port', action='store', default=MONGO_PORT)
+        self.add_argument('-p', '--port', action='store', default=PG_PORT)
         return self
 
     def add_dbname(self):
@@ -82,7 +90,7 @@ class ProsaicArgParser(ArgumentParser):
         return self
 
     def add_db(self):
-        self.add_dbhost().add_dbport().add_dbname()
+        self.add_dbhost().add_dbport().add_dbname().add_dbuser().add_dbpass()
         return self
 
     def read_template(self, filename):
@@ -106,11 +114,12 @@ class ProsaicArgParser(ArgumentParser):
     # Actually define commands:
 
     def corpus_ls(self):
-        for dbname in self.client.database_names():
-            print(dbname)
+        # TODO actually use corpus table
+        raise NotImplementedError("actually use corpora table")
 
     def corpus_rm(self):
-        self.client.drop_database(self.args.dbname)
+        # TODO actually use corpus table
+        raise NotImplementedError("actually use corpora table")
 
     def corpus_loadfile(self):
         # TODO stream this, don't slurp it.

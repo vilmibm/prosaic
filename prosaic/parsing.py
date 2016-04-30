@@ -1,13 +1,7 @@
 import re
 import prosaic.nlp as nlp
 from prosaic.models import Phrase, Source, db_engine, Engine
-
-# TODO this is just for development
-import prosaic.models as m
 from sqlalchemy.orm import sessionmaker
-Session = sessionmaker()
-Session.configure(bind=m.engine)
-# ODOT
 
 pairs = [('{', '}'), ('(', ')'), ('[', ']')]
 bad_substrings = ['`', '“', '”', '«', '»', "''", '\\n', '\\',]
@@ -38,19 +32,17 @@ def pre_process_sentence(sentence: str) -> str:
     return sentence.rstrip().lstrip()
 
 # TODO support source descriptions
-# TODO take a session
 def process_text(raw_text: str, source_name: str, db: Engine) -> None:
     """Given raw text and a source filename, adds a new source with the raw
     text as its content and then processes all of the phrases in the text."""
 
+    print('connecting to db...')
+    session = sessionmaker(db)()
+
     print('pre-processing text...')
     raw_text = pre_process_text(raw_text)
     source = Source(name=source_name, content=raw_text, description="todo")
-
-    session = Session()
     session.add(source)
-
-    # TODO save source to db?
 
     print('extracting sentences')
     sentences = nlp.sentences(raw_text)

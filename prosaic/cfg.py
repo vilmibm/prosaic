@@ -12,11 +12,14 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from getpass import getuser
 from os import environ
 from os.path import expanduser, join
 
-MONGO_HOST = environ.get('PROSAIC_DBHOST', 'localhost')
-MONGO_PORT = int(environ.get('PROSAIC_DBPORT', 27017))
+PG_USER = environ.get('PROSAIC_DBUSER', getuser())
+PG_PASS = environ.get('PROSAIC_DBPASS', '')
+PG_HOST = environ.get('PROSAIC_DBHOST', 'localhost')
+PG_PORT = int(environ.get('PROSAIC_DBPORT', 5432))
 DEFAULT_DB = environ.get('PROSAIC_DBNAME', 'prosaic')
 PROSAIC_HOME = environ.get('PROSAIC_HOME', join(expanduser('~'), '.prosaic'))
 DEFAULT_TEMPLATE = 'haiku'
