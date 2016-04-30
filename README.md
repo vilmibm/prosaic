@@ -69,11 +69,11 @@ a poem line by line.
 ## use as a library
 
 ```python
-from pymongo import MongoClient
-from prosaic.nyarlathotep import process_text
+from prosaic.models import db_engine
+from prosaic.parsing import process_text
 from prosaic.cthulhu import poem_from_template
 
-db = MongoClient().my_corpus_db.phrases
+db = db_engine('dbuser', 'dbpass', 'localhost', 5432)
 process_text("some very long string of text", "a name for this long string of text", db)
 
 # poem_from_template returns raw line dictionaries from the database:
