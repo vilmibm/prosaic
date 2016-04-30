@@ -12,7 +12,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from sqlalchemy import create_engine, Column, Boolean
+from sqlalchemy import create_engine, Column, Boolean, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.engine import Engine
 from sqlalchemy.dialects.postgresql import ARRAY, TEXT, INTEGER
@@ -28,6 +28,10 @@ engine = db_engine('vilmibm', 'foobar', 'localhost', 'prosaic')
 
 Base = declarative_base()
 
+corpora_sources = Table('corpora_sources', Base.metadata,
+                       Column('corpus_id', INTEGER, ForeignKey('corpora.id')),
+                       Column('source_id', INTEGER, ForeignKey('sources.id')))
+
 class Source(Base):
     __tablename__ = "sources"
 
@@ -35,8 +39,6 @@ class Source(Base):
     name = Column(TEXT)
     description = Column(TEXT)
     content = Column(TEXT)
-
-    phrases = relationship('Phrase', back_populates='sources')
 
 class Phrase(Base):
     __tablename__ = "phrases"
@@ -46,17 +48,22 @@ class Phrase(Base):
     raw = Column(TEXT)
     alliteration = Column(Boolean)
     rhyme_sound = Column(TEXT)
-    phonemes = Column(ARRAY(TEXT))
     syllables = Column(INTEGER)
     line_no = Column(INTEGER)
+    source_id = Column(INTEGER, ForeignKey('sources.id'))
 
     source = relationship('Source', back_populates='phrases')
 
-    # TODO Need to think about this:
-    # tagged = Column(ARRAY(ARRAY(TEXT)))
+    # TODO This just isn't working :(
+    # I realized though that I wasn't even using these in rules. I'll circle
+    # back on these once I have a compelling reason to do so.
+    #phonemes = Column(ARRAY(TEXT, dimensions=2))
+    #tagged = Column(ARRAY(TEXT, dimensions=2))
 
     def __repr__(self) -> str:
         return "Phrase(raw='%s', source='%s')" % (self.raw, self.source.name)
+
+Source.phrases = relationship('Phrase', back_populates='source')
 
 class Corpus(Base):
     __tablename__ = "corpora"
@@ -64,4 +71,4 @@ class Corpus(Base):
     id = Column(INTEGER, primary_key=True)
     name = Column(TEXT)
 
-    source = relationship('Source')
+    sources = relationship('Source', secondary=corpora_sources)
