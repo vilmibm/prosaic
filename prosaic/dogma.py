@@ -17,6 +17,7 @@ from random import choice
 import re
 
 import prosaic.nlp as nlp
+from prosaic.models import Phrase, Corpus, Source
 from prosaic.util import match, is_empty, update
 
 class Rule:
@@ -27,10 +28,7 @@ class Rule:
             self.strength -= 1
 
     def to_query(self):
-        # Typically there would be a cond over (. self
-        # strength) here, but this base class represents the
-        # trivial rule.
-        return {'blank': False}
+        return '1 = 1'
 
 class SyllableCountRule(Rule):
     __slots__ = ['syllables', 'strength',]
@@ -40,55 +38,68 @@ class SyllableCountRule(Rule):
 
     def to_query(self):
         if 0 == self.strength:
-            query = super().to_query()
-        else:
-            modifier = self.syllables - self.strength
-            lte = self.syllables + modifier
-            gte = self.syllables - modifier
-            query = {'num_syllables': {'$lte': lte, '$gte': gte}}
+            return super().to_query()
 
-        return query
+        modifier = self.syllables - self.strength
+        return 'p.syllables >= {} and p.syllables <= {}'.format(
+                self.syllables + modifier,
+                self.syllables - modifier)
 
 class KeywordRule(Rule):
     __slots__ = ['keyword', 'phrase_cache', 'strength']
     max_strength = 11
+    # TODO
     where_clause_tmpl = 'Math.abs({} - this.line_no) <= {}'
 
-    def __init__(self, keyword, db):
+    # TODO needs a corpus
+    def __init__(self, keyword, conn, corpus):
         self.strength = self.max_strength
         self.keyword = nlp.stem_word(keyword)
-        self.prime_cache(db)
+        self.prime_cache(conn, corpus)
 
-    def prime_cache(self, db):
+    # TODO needs a corpus
+    def prime_cache(self, conn, corpus):
         print('building phrase cache')
+        # TODO I have some choices, here.
+        # 1. stop phrase caching. Instead, look into indexing.
+        # 2. continue caching, using array lookup
+        # 3. continue caching, using pg full text search
+        # I feel like in the interest of getting this postgresql port done, I'd
+        # actually like to just remove phrase caching and get slow in the
+        # interest of Doing It Right with benchmarks from a good baseline (ie,
+        # indices).
         self.phrase_cache = list(db.find({'stems': self.keyword}))
         if is_empty(self.phrase_cache):
             self.strength = 0
 
     def to_query(self):
         if 0 == self.strength:
-            query = super().to_query()
-        else:
-            phrase = choice(self.phrase_cache)
-            ok_distance = self.max_strength - self.strength
-            line_no = phrase['line_no']
-            query = {'source': phrase['source'],
-                     '$where': self.where_clause_tmpl.format(line_no, ok_distance),}
+            return super().to_query()
+
+        # TODO
+        raise NotImplementedError()
+
+        phrase = choice(self.phrase_cache)
+        ok_distance = self.max_strength - self.strength
+        line_no = phrase['line_no']
+        query = {'source': phrase['source'],
+                 '$where': self.where_clause_tmpl.format(line_no, ok_distance),}
 
         return query
 
 class FuzzyKeywordRule(KeywordRule):
     def to_query(self):
         if 0 == self.strength:
-            query = super().to_query()
-        else:
-            # TODO can do a better job of DRYing here
-            phrase = choice(self.phrase_cache)
-            ok_distance = 1 + self.max_strength - self.strength
-            line_no = phrase['line_no']
-            query = {'source': phrase['source'],
-                     'line_no': {'$ne': line_no},
-                     '$where': self.where_clause_tmpl.format(line_no, ok_distance),}
+            return super().to_query()
+        raise NotImplementedError()
+        # TODO can do a better job of DRYing here
+        phrase = choice(self.phrase_cache)
+        ok_distance = 1 + self.max_strength - self.strength
+        line_no = phrase['line_no']
+
+        query = {'source': phrase['source'],
+                 'line_no': {'$ne': line_no},
+                 '$where': self.where_clause_tmpl.format(line_no, ok_distance),}
         return query
 
 zero_re = re.compile('0')
@@ -123,11 +134,9 @@ class RhymeRule(Rule):
 
     def to_query(self):
         if 0 == self.strength:
-            query = super().to_query()
-        else:
-            query = {'rhyme_sound': self.next_sound()}
+            return super().to_query()
 
-        return query
+        return "p.rhyme_sound = '{}'".format(self.next_sound())
 
 class AlliterationRule(Rule):
     __slots__ = ['strength', 'which']
@@ -137,11 +146,9 @@ class AlliterationRule(Rule):
 
     def to_query(self):
         if 0 == self.strength:
-            query = super().to_query()
-        else:
-            query = {'alliteration': self.which}
+            return super().to_query()
 
-        return query
+        return "p.alliteration = true"
 
 class BlankRule(Rule):
     __slots__ = ['strength', 'db']
@@ -150,17 +157,23 @@ class BlankRule(Rule):
         self.db = db
 
     def to_query(self):
-        if self.db.find({'blank': True}).count() == 0:
-            self.db.insert({'blank': True, 'raw': '',})
-
-        return {'blank': True}
+        raise NotImplementedError()
 
 class RuleSet:
     def __init__(self, rules):
         self.rules = rules
 
-    def to_query(self):
-        return reduce(update, map(lambda r: r.to_query(), self.rules))
+    def to_query(self, sess):
+        base_sql = """
+            select p.raw
+            from phrases p
+            join corpora_sources cs
+            on p.source_id = cs.source_id
+            where corpus_id = :corpus_id
+        """
+
+        wheres = map(lambda r: r.to_query(), self.rules)
+        return base_sql + ' and ' + ' and '.join(wheres)
 
     def weaken(self):
         choice(self.rules).weaken()

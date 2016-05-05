@@ -23,9 +23,10 @@ from sh import rm, cp
 
 from prosaic.models import db_engine
 from prosaic.parsing import process_text
-from prosaic.cthulhu import poem_from_template
+from prosaic.models import Corpus
+from prosaic.generation import poem_from_template
 from prosaic.cfg import DEFAULT_TEMPLATE_EXT, TEMPLATES, EXAMPLE_TEMPLATE, PG_HOST, PG_PORT, PG_USER, PG_PASS,DEFAULT_DB
-from prosaic.util import slurp
+from prosaic.util import slurp, first
 
 class ProsaicArgParser(ArgumentParser):
     editor = environ.get('EDITOR')
@@ -128,15 +129,16 @@ class ProsaicArgParser(ArgumentParser):
 
     def poem_new(self):
         template = self.template
-        poem_lines = poem_from_template(self.template, self.db)
+        # TODO uh don't hardcode corpus
+        poem_lines = map(first, poem_from_template(self.template, self.db, Corpus(id=2)))
         output_filename = self.args.output
         if output_filename:
             with open(output_filename, 'w') as f:
-                f.write(map(lambda l: l.get('raw'), poem_lines).join('\n') + '\n')
+                f.write(list(poem_lines).join('\n') + '\n')
                 print('poem written to {}'.format(output_filename))
         else:
             for line in poem_lines:
-                print(line.get('raw'))
+                print(line)
 
     def template_ls(self):
         template_files = filter(lambda s: not s.startswith('.'), listdir(TEMPLATES))
