@@ -156,6 +156,11 @@ class BlankRule(Rule):
         self.db = db
 
     def to_query(self):
+        # TODO i feel like this should be something hardcoded at the ruleset
+        # level. It's probably fine to leave this as not implemented and then
+        # have code in the ruleset that detects a rule of type BlankRule and
+        # nullifies the whole line into the empty string, avoiding ruleset ->
+        # line querying at all.
         raise NotImplementedError()
 
 class RuleSet:
