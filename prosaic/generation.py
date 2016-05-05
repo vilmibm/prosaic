@@ -47,7 +47,7 @@ def map_letters_to_sounds(conn: Connection, corpus, template, sound_cache=None):
         cache = dict(map(lambda l: [l, choice(sounds)], letters))
     return cache
 
-def extract_rule(conn, letter_sound_map, raw_pair):
+def extract_rule(conn, corpus, letter_sound_map, raw_pair):
     rule_key = first(raw_pair)
     value = second(raw_pair)
     rule = None
@@ -57,15 +57,14 @@ def extract_rule(conn, letter_sound_map, raw_pair):
     if rule_key == 'rhyme': rule = dogma.RhymeRule(letter_sound_map.get(value))
     elif rule_key == 'blank': rule = dogma.BlankRule(conn)
     elif rule_key == 'alliteration': rule = dogma.AlliterationRule(value)
-    elif rule_key == 'keyword': rule = dogma.KeywordRule(value, conn)
-    elif rule_key == 'fuzzy': rule = dogma.FuzzyKeywordRule(value, conn)
+    elif rule_key == 'keyword': rule = dogma.KeywordRule(value, conn, corpus)
+    elif rule_key == 'fuzzy': rule = dogma.FuzzyKeywordRule(value, conn, corpus)
     elif rule_key == 'syllables': rule = dogma.SyllableCountRule(value)
 
     return rule
 
-def extract_ruleset(conn, letter_sound_map, template_line):
-    # TODO probably need corpus
-    rules = map(partial(extract_rule, conn, letter_sound_map), template_line.items())
+def extract_ruleset(conn, corpus, letter_sound_map, template_line):
+    rules = map(partial(extract_rule, conn, corpus, letter_sound_map), template_line.items())
     return dogma.RuleSet(list(rules))
 
 def ruleset_to_line(conn, corpus: Corpus, ruleset) -> str:
@@ -84,7 +83,7 @@ def poem_from_template(template, engine: Engine, corpus: Corpus, sound_cache=Non
     conn = engine.connect()
     executor = ThreadPoolExecutor(4)
     letter_sound_map = map_letters_to_sounds(conn, corpus, template, sound_cache)
-    process_tmpl_line = threaded(partial(extract_ruleset, conn, letter_sound_map),
+    process_tmpl_line = threaded(partial(extract_ruleset, conn, corpus, letter_sound_map),
                                  partial(ruleset_to_line, conn, corpus))
     poem_lines = executor.map(process_tmpl_line, template)
     executor.shutdown()

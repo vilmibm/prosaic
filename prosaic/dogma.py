@@ -16,6 +16,8 @@ from functools import reduce
 from random import choice
 import re
 
+import sqlalchemy as sa
+
 import prosaic.nlp as nlp
 from prosaic.models import Phrase, Corpus, Source
 from prosaic.util import match, is_empty, update
@@ -48,27 +50,26 @@ class SyllableCountRule(Rule):
 class KeywordRule(Rule):
     __slots__ = ['keyword', 'phrase_cache', 'strength']
     max_strength = 11
-    # TODO
-    where_clause_tmpl = 'Math.abs({} - this.line_no) <= {}'
 
-    # TODO needs a corpus
     def __init__(self, keyword, conn, corpus):
         self.strength = self.max_strength
         self.keyword = nlp.stem_word(keyword)
         self.prime_cache(conn, corpus)
 
-    # TODO needs a corpus
     def prime_cache(self, conn, corpus):
         print('building phrase cache')
-        # TODO I have some choices, here.
-        # 1. stop phrase caching. Instead, look into indexing.
-        # 2. continue caching, using array lookup
-        # 3. continue caching, using pg full text search
-        # I feel like in the interest of getting this postgresql port done, I'd
-        # actually like to just remove phrase caching and get slow in the
-        # interest of Doing It Right with benchmarks from a good baseline (ie,
-        # indices).
-        self.phrase_cache = list(db.find({'stems': self.keyword}))
+        sql = """
+        select p.line_no, p.source_id
+        from phrases p
+        join corpora_sources cs
+        on p.source_id = cs.source_id
+        where corpus_id = :corpus_id
+        and p.stems @> ARRAY[:keyword]
+        """
+        self.phrase_cache = conn.execute(sa.text(sql)\
+                                         .params(keyword=self.keyword,
+                                                 corpus_id=corpus.id))\
+                            .fetchall()
         if is_empty(self.phrase_cache):
             self.strength = 0
 
@@ -76,31 +77,29 @@ class KeywordRule(Rule):
         if 0 == self.strength:
             return super().to_query()
 
-        # TODO
-        raise NotImplementedError()
+        if self.max_strength == self.strength:
+            return "stems @> ARRAY['{}']".format(self.keyword)
 
         phrase = choice(self.phrase_cache)
         ok_distance = self.max_strength - self.strength
-        line_no = phrase['line_no']
-        query = {'source': phrase['source'],
-                 '$where': self.where_clause_tmpl.format(line_no, ok_distance),}
+        line_no, source_id = phrase
 
-        return query
+        return "p.source_id = {} and abs({} - p.line_no) <= {}".format(
+            source_id, line_no, ok_distance
+        )
 
 class FuzzyKeywordRule(KeywordRule):
     def to_query(self):
         if 0 == self.strength:
             return super().to_query()
-        raise NotImplementedError()
-        # TODO can do a better job of DRYing here
+
         phrase = choice(self.phrase_cache)
         ok_distance = 1 + self.max_strength - self.strength
-        line_no = phrase['line_no']
+        line_no, source_id = phrase
 
-        query = {'source': phrase['source'],
-                 'line_no': {'$ne': line_no},
-                 '$where': self.where_clause_tmpl.format(line_no, ok_distance),}
-        return query
+        return "source_id = {} and abs({} - p.line_no) <= {}".format(
+            source_id, line_no, ok_distance
+        )
 
 zero_re = re.compile('0')
 one_re = re.compile('1')
