@@ -80,7 +80,7 @@ def ruleset_to_line(conn, corpus: Corpus, ruleset) -> str:
             line = choice(lines)
     return line
 
-def poem_from_template(template, engine: Engine, corpus: Corpus, sound_cache=None):
+def poem_from_template(template, engine: Engine, corpus, sound_cache=None):
     conn = engine.connect()
     executor = ThreadPoolExecutor(4)
     letter_sound_map = map_letters_to_sounds(conn, corpus, template, sound_cache)

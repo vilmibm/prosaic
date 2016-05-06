@@ -20,6 +20,7 @@ from subprocess import call
 import sys
 
 from sh import rm, cp
+from sqlalchemy.orm import sessionmaker
 
 from prosaic.models import db_engine
 from prosaic.parsing import process_text
@@ -90,8 +91,12 @@ class ProsaicArgParser(ArgumentParser):
         self.add_argument('-d', '--dbname', action='store', default=DEFAULT_DB)
         return self
 
+    def add_corpus(self):
+        self.add_argument('-c', '--corpus', action='store', default='_prosaic')
+        return self
+
     def add_db(self):
-        self.add_dbhost().add_dbport().add_dbname().add_dbuser().add_dbpass()
+        self.add_dbhost().add_dbport().add_dbname().add_dbuser().add_dbpass().add_corpus()
         return self
 
     def read_template(self, filename):
@@ -129,8 +134,10 @@ class ProsaicArgParser(ArgumentParser):
 
     def poem_new(self):
         template = self.template
-        # TODO uh don't hardcode corpus
-        poem_lines = map(first, poem_from_template(self.template, self.db, Corpus(id=2)))
+        session = sessionmaker(self.db)()
+        corpus = session.query(Corpus).filter(Corpus.name==self.args.corpus).one_or_none()
+        # TODO if corpus is none, create _prosaic and re-fetch
+        poem_lines = map(first, poem_from_template(self.template, self.db, corpus))
         output_filename = self.args.output
         if output_filename:
             with open(output_filename, 'w') as f:
@@ -160,11 +167,12 @@ class ProsaicArgParser(ArgumentParser):
     def dispatch(self):
         self.args = self.parse_args()
         # TODO try catch
-        try:
-            self.args.func()
-        except AttributeError as e:
-            self.print_help()
-            return 1
+        #try:
+        #    self.args.func()
+        #except AttributeError as e:
+        #    self.print_help()
+        #    return 1
+        self.args.func()
 
         return 0
 
