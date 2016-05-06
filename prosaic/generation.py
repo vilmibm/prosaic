@@ -52,8 +52,6 @@ def extract_rule(conn, corpus, letter_sound_map, raw_pair):
     value = second(raw_pair)
     rule = None
 
-    # TODO will probably want a corpus argument threaded in here
-
     if rule_key == 'rhyme': rule = dogma.RhymeRule(letter_sound_map.get(value))
     elif rule_key == 'blank': rule = dogma.BlankRule(conn)
     elif rule_key == 'alliteration': rule = dogma.AlliterationRule(value)
@@ -68,6 +66,9 @@ def extract_ruleset(conn, corpus, letter_sound_map, template_line):
     return dogma.RuleSet(list(rules))
 
 def ruleset_to_line(conn, corpus: Corpus, ruleset) -> str:
+    if ruleset.contains(dogma.BlankRule):
+        return ("",)
+
     line = None
     while not line:
         sql = ruleset.to_query(conn)
