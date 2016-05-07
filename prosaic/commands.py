@@ -41,7 +41,6 @@ class ProsaicArgParser(ArgumentParser):
         if self._corpus is not None:
             return self._corpus
 
-
         self._corpus = self.session.query(Corpus)\
                        .filter(Corpus.name == self.args.corpus)\
                        .one_or_none()
@@ -127,7 +126,7 @@ class ProsaicArgParser(ArgumentParser):
         return self
 
     def add_db(self):
-        self.add_dbhost().add_dbport().add_dbname().add_dbuser().add_dbpass().add_corpus()
+        self.add_dbhost().add_dbport().add_dbname().add_dbuser().add_dbpass()
         return self
 
     def read_template(self, filename):
@@ -174,6 +173,18 @@ class ProsaicArgParser(ArgumentParser):
         text = slurp(self.args.path)
         corpus = self.corpus
         return process_text(text, self.args.path, corpus, self.db)
+
+    def source_ls(self):
+        # TODO
+        pass
+
+    def source_rm(self):
+        # TODO
+        pass
+
+    def source_new(self):
+        # TODO
+        pass
 
     def poem_new(self):
         template = self.template
@@ -224,12 +235,17 @@ def initialize_arg_parser():
     corpus_parser = subparsers.add_parser('corpus')
     corpus_subs = corpus_parser.add_subparsers()
 
+    source_parser = subparsers.add_parser('source')
+    source_subs = source_parser.add_subparsers()
+
     poem_parser = subparsers.add_parser('poem')
     poem_subs = poem_parser.add_subparsers()
 
     template_parser = subparsers.add_parser('template')
     template_subs = template_parser.add_subparsers()
 
+
+    # TODO this can probably be deleted
     parser.add_argument('infile', nargs='?', type=FileType('r'), default=sys.stdin)
 
     # corpus commands
@@ -240,12 +256,23 @@ def initialize_arg_parser():
                .add_db()
     corpus_subs.add_parser('rm') \
                .set_defaults(func=parser.corpus_rm) \
-               .add_dbhost() \
-               .add_dbport() \
-               .add_dbuser() \
-               .add_dbname() \
-               .add_dbpass() \
+               .add_db()\
                .add_argument('corpus', action='store')
+
+    # source commands
+    source_subs.add_parser('ls')\
+            .set_defaults(func=parser.source_ls)\
+            .add_db()
+    source_subs.add_parser('rm')\
+            .set_defaults(func=parser.source_rm)\
+            .add_db()\
+            .add_argument('source_name', action='store')
+    source_subs.add_parser('new')\
+            .set_defaults(func=parser.source_new)\
+            .add_db()\
+            .add_argument('source_name', action='store')\
+            .add_argument('path', action='store')\
+            .add_argument('description', action='store', default='')
 
     # poem commands
     poem_subs.add_parser('new') \
