@@ -52,7 +52,7 @@ def get_session(db: Database) -> Session:
     return sessionmaker(get_engine(db))()
 
 # this is hardcoded for use in the repl
-db = Database(user='vilmibm')
+db = Database(user='vilmibm', password='foobar')
 
 Base = declarative_base()
 

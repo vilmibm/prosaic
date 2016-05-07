@@ -42,22 +42,29 @@ class ProsaicArgParser(ArgumentParser):
             return self._corpus
 
         self._corpus = self.session.query(Corpus)\
-                       .filter(Corpus.name == self.args.corpus)\
+                       .filter(Corpus.name == self.args.corpus_name)\
                        .one_or_none()
 
         if self._corpus is None:
-            print('creating new corpus {}...'.format(self.args.corpus))
-            self._corpus = Corpus(name=self.args.corpus)
+            print('creating new corpus {}...'.format(self.args.corpus_name))
+            self._corpus = Corpus(name=self.args.corpus_name)
             self.session.add(self._corpus)
             self.session.commit()
 
-        if self.args.corpus == '_prosaic':
+        if self.args.corpus_name == '_prosaic':
             print('updating default corpus...')
             self._corpus.sources = self.session.query(Source).all()
             self.session.add(self._corpus)
             self.session.commit()
 
         return self._corpus
+
+    @property
+    def source(self):
+        session = self.session
+        return session.query(Source)\
+                .filter(Source.name==self.args.source_name)\
+                .one()
 
     @property
     def session(self):
@@ -168,25 +175,72 @@ class ProsaicArgParser(ArgumentParser):
         conn.execute(text(unlink_sql).params(corpus_id=self.corpus.id))
         conn.execute(text(delete_sql).params(corpus_name=self.corpus.name))
 
-    def corpus_loadfile(self):
-        # TODO stream this, don't slurp it.
-        text = slurp(self.args.path)
-        corpus = self.corpus
-        return process_text(text, self.args.path, corpus, self.db)
+    def corpus_link(self):
+        self.corpus.sources.append(self.source)
+        self.session.add(self.corpus)
+        self.session.commit()
+
+    def corpus_unlink(self):
+        self.corpus.sources.remove(self.source)
+        self.session.add(self.corpus)
+        self.session.commit()
+
+    def corpus_new(self):
+        corpus = Corpus(name=self.args.corpus_name,
+                        description=self.args.corpus_desc)
+        self.session.add(corpus)
+        self.session.commit()
+
+    def corpus_sources(self):
+        if 0 == len(self.corpus.sources):
+            print("Corpus {} has no sources.".format(self.corpus.name))
+            print("Use `prosaic corpus link 'corpus name' 'source name'` to add sources")
+        for source in self.corpus.sources:
+            print(source.name)
 
     def source_ls(self):
-        # TODO
-        pass
+        session = self.session
+        for name in session.query(Source.name):
+            print(first(name))
 
     def source_rm(self):
-        # TODO
-        pass
+        # ugh i know; TODO figure out how to do this with ORM
+        conn = self.engine.connect()
+        session = self.session
+        unlink_sql = """
+        delete from corpora_sources
+        where source_id = :source_id
+        """
+        # TODO bug until source name is unique
+        source_delete_sql = """
+        delete from sources
+        where name = :source_name
+        """
+        phrase_delete_sql = """
+        delete from phrases
+        where source_id = :source_id
+        """
+        name = self.args.source_name
+        source_id = first(session.query(Source.id).filter(Source.name == name).one())
+        conn.execute(text(unlink_sql).params(source_id=source_id))
+        conn.execute(text(phrase_delete_sql).params(source_id=source_id))
+        conn.execute(text(source_delete_sql).params(source_name=name))
 
     def source_new(self):
-        # TODO
-        pass
+        # TODO slurpin's bad; would be better to fully pipeline parsing from
+        # file -> processing -> db, with threading.
+        text = slurp(self.args.path)
+        name = self.args.source_name
+        description = self.args.source_description
+        source = Source(name=name, description=description)
+
+        process_text(self.db, source, text)
 
     def poem_new(self):
+        if 0 == len(self.corpus.sources):
+            print("Corpus {} has no sources.".format(self.corpus.name))
+            print("Use `prosaic corpus link 'corpus name' 'source name'` to add sources")
+            return
         template = self.template
         poem_lines = map(first, poem_from_template(self.template, self.db, self.corpus))
         output_filename = self.args.output
@@ -250,14 +304,29 @@ def initialize_arg_parser():
 
     # corpus commands
     corpus_subs.add_parser('ls').set_defaults(func=parser.corpus_ls).add_db()
-    corpus_subs.add_parser('loadfile') \
-               .set_defaults(func=parser.corpus_loadfile) \
-               .add_argument('path', action='store') \
-               .add_db()
-    corpus_subs.add_parser('rm') \
-               .set_defaults(func=parser.corpus_rm) \
-               .add_db()\
-               .add_argument('corpus', action='store')
+    corpus_subs.add_parser('new')\
+            .set_defaults(func=parser.corpus_new)\
+            .add_db()\
+            .add_argument('corpus_name', action='store')\
+            .add_argument('corpus_desc', action='store')
+    corpus_subs.add_parser('link')\
+            .set_defaults(func=parser.corpus_link)\
+            .add_db()\
+            .add_argument('corpus_name', action='store')\
+            .add_argument('source_name', action='store')
+    corpus_subs.add_parser('unlink')\
+            .set_defaults(func=parser.corpus_unlink)\
+            .add_db()\
+            .add_argument('corpus_name', action='store')\
+            .add_argument('source_name', action='store')
+    corpus_subs.add_parser('sources')\
+            .set_defaults(func=parser.corpus_sources)\
+            .add_db()\
+            .add_argument('corpus_name', action='store')
+    corpus_subs.add_parser('rm')\
+            .set_defaults(func=parser.corpus_rm)\
+            .add_db()\
+            .add_argument('corpus_name', action='store')
 
     # source commands
     source_subs.add_parser('ls')\
@@ -272,11 +341,12 @@ def initialize_arg_parser():
             .add_db()\
             .add_argument('source_name', action='store')\
             .add_argument('path', action='store')\
-            .add_argument('description', action='store', default='')
+            .add_argument('source_description', action='store', default='')
 
     # poem commands
     poem_subs.add_parser('new') \
              .set_defaults(func=parser.poem_new) \
+             .add_argument('-c', '--corpus', dest='corpus_name', action='store')\
              .add_argument('-r', '--tmpl_raw', action='store_true') \
              .add_argument('-o', '--output', action='store') \
              .add_argument('-t', '--tmpl', action='store', default='haiku') \

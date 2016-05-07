@@ -26,6 +26,7 @@ _aliases_: c, corpora
 * new
 * link
 * unlink
+* sources
 
 ### ls
 
@@ -56,6 +57,12 @@ Adds a source to a given corpus.
     prosaic corpus unlink "source name"
 
 Removes a source from a given corpus.
+
+### sources
+
+    prosaic corpus sources "corpus name"
+
+Lists all of the sources in a corpus.
 
 ## source
 

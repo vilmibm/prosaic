@@ -31,7 +31,7 @@ def pre_process_sentence(sentence: str) -> str:
     return sentence.rstrip().lstrip()
 
 # TODO support source descriptions
-def process_text(raw_text: str, source_name: str, corpus: Corpus, db: Database) -> None:
+def process_text(db: Database, source: Source, raw_text: str) -> None:
     """Given raw text and a source filename, adds a new source with the raw
     text as its content and then processes all of the phrases in the text."""
 
@@ -39,15 +39,14 @@ def process_text(raw_text: str, source_name: str, corpus: Corpus, db: Database) 
     session = get_session(db)
 
     print('pre-processing text...')
-    raw_text = pre_process_text(raw_text)
+    text = pre_process_text(raw_text)
 
     print('adding source to corpus...')
-    source = Source(name=source_name, content=raw_text, description="todo")
-    corpus.sources.append(source)
-    session.add(corpus)
+    source.content = text
+    session.add(source)
 
     print('extracting sentences')
-    sentences = nlp.sentences(raw_text)
+    sentences = nlp.sentences(text)
 
     print("expanding clauses...")
     sentences = nlp.expand_multiclauses(sentences)
