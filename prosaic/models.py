@@ -100,5 +100,6 @@ class Corpus(Base):
     id = Column(INTEGER, primary_key=True)
     # TODO Needs to be unique and not nil
     name = Column(TEXT)
+    description = Column(TEXT)
 
     sources = relationship('Source', secondary=corpora_sources)
