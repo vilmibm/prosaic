@@ -20,11 +20,9 @@ from subprocess import call
 import sys
 
 from sh import rm, cp
-from sqlalchemy.orm import sessionmaker
 
-from prosaic.models import db_engine
+from prosaic.models import Source, Corpus, get_session, get_engine, Database
 from prosaic.parsing import process_text
-from prosaic.models import Corpus
 from prosaic.generation import poem_from_template
 from prosaic.cfg import DEFAULT_TEMPLATE_EXT, TEMPLATES, EXAMPLE_TEMPLATE, PG_HOST, PG_PORT, PG_USER, PG_PASS,DEFAULT_DB
 from prosaic.util import slurp, first
@@ -33,20 +31,48 @@ class ProsaicArgParser(ArgumentParser):
     editor = environ.get('EDITOR')
     _template = None
     _db = None
+    _corpus = None
 
     # Helpers and properties:
 
     @property
-    def db(self):
-        # TODO honor port
-        if not self.args:
-            return None
+    def corpus(self):
+        if self._corpus is not None:
+            return self._corpus
 
-        args = self.args
+
+        self._corpus = self.session.query(Corpus)\
+                       .filter(Corpus.name == self.args.corpus)\
+                       .one_or_none()
+
+        if self._corpus is None:
+            print('creating new corpus {}...'.format(self.args.corpus))
+            self._corpus = Corpus(name=self.args.corpus)
+            self.session.add(self._corpus)
+            self.session.commit()
+
+        if self.args.corpus == '_prosaic':
+            print('updating default corpus...')
+            self._corpus.sources = self.session.query(Source).all()
+            self.session.add(self._corpus)
+            self.session.commit()
+
+        return self._corpus
+
+    @property
+    def session(self):
+        return get_session(self.db)
+
+    @property
+    def db(self) -> Database:
         if self._db:
             return self._db
 
-        self._db = db_engine(args.user, args.password, args.host, args.dbname)
+        self._db = Database(user=self.args.user,
+                            password=self.args.password,
+                            host=self.args.host,
+                            dbname=self.args.dbname,
+                            port=self.args.port)
         return self._db
 
     @property
@@ -130,14 +156,12 @@ class ProsaicArgParser(ArgumentParser):
     def corpus_loadfile(self):
         # TODO stream this, don't slurp it.
         text = slurp(self.args.path)
-        return process_text(text, self.args.path, self.db)
+        corpus = self.corpus
+        return process_text(text, self.args.path, corpus, self.db)
 
     def poem_new(self):
         template = self.template
-        session = sessionmaker(self.db)()
-        corpus = session.query(Corpus).filter(Corpus.name==self.args.corpus).one_or_none()
-        # TODO if corpus is none, create _prosaic and re-fetch
-        poem_lines = map(first, poem_from_template(self.template, self.db, corpus))
+        poem_lines = map(first, poem_from_template(self.template, self.db, self.corpus))
         output_filename = self.args.output
         if output_filename:
             with open(output_filename, 'w') as f:
@@ -166,13 +190,12 @@ class ProsaicArgParser(ArgumentParser):
 
     def dispatch(self):
         self.args = self.parse_args()
-        # TODO try catch
-        #try:
-        #    self.args.func()
-        #except AttributeError as e:
-        #    self.print_help()
-        #    return 1
-        self.args.func()
+        try:
+            self.args.func()
+        except AttributeError as e:
+            print('Caught fatal error: {}'.format(e))
+            self.print_help()
+            return 1
 
         return 0
 

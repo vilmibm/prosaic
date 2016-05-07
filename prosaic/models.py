@@ -12,19 +12,47 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from functools import lru_cache
 from sqlalchemy import create_engine, Column, Boolean, ForeignKey, Table
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, sessionmaker, Session
 from sqlalchemy.engine import Engine
 from sqlalchemy.dialects.postgresql import ARRAY, TEXT, INTEGER
 from sqlalchemy.ext.declarative import declarative_base
 
 # TODO rebuild venv outside of prosaic src
 
-def db_engine(username: str, password: str, dbhost: str, dbname: str) -> Engine:
-    return create_engine('postgresql://{}:{}@{}/{}'.format(username, password, dbhost, dbname))
+class Database(dict):
+    def __init__(self, user='prosaic', password='prosaic', host='localhost',
+                 port=5432, dbname='prosaic'):
+        self._data = dict(user=user, password=password, port=port,
+                          host=host, dbname=dbname)
 
-# TODO this is hardcoded, shouldn't be
-engine = db_engine('vilmibm', 'foobar', 'localhost', 'prosaic')
+    def __getattr__(self, k):
+        return self[k]
+
+    def __getitem__(self, k):
+        return self._data[k]
+
+    def _fmt(self):
+        return ';'.join(sorted(map(str, self._data.values())))
+
+    def __hash__(self):
+        return hash(self._fmt())
+
+    def __repr__(self):
+        return self._fmt()
+
+@lru_cache(maxsize=8)
+def get_engine(db: Database) -> Engine:
+    return create_engine('postgresql://{user}:{password}@{host}:{port}/{dbname}'\
+           .format(**db))
+
+@lru_cache(maxsize=8)
+def get_session(db: Database) -> Session:
+    return sessionmaker(get_engine(db))()
+
+# this is hardcoded for use in the repl
+db = Database(user='vilmibm')
 
 Base = declarative_base()
 

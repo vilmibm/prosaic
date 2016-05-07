@@ -19,12 +19,11 @@ from random import choice
 from json import loads
 import sys
 
-from sqlalchemy.engine import Engine
 from sqlalchemy.engine.base import Connection
 import sqlalchemy as sa
 
 import prosaic.dogma as dogma
-from prosaic.models import Phrase, Corpus, Source
+from prosaic.models import Phrase, Corpus, Source, get_engine, Database
 from prosaic.util import pluck, is_empty, threaded, first, second
 
 def unique_sounds(conn: Connection, corpus: Corpus) -> [str]:
@@ -80,7 +79,8 @@ def ruleset_to_line(conn, corpus: Corpus, ruleset) -> str:
             line = choice(lines)
     return line
 
-def poem_from_template(template, engine: Engine, corpus, sound_cache=None):
+def poem_from_template(template, db: Database, corpus, sound_cache=None):
+    engine = get_engine(db)
     conn = engine.connect()
     executor = ThreadPoolExecutor(4)
     letter_sound_map = map_letters_to_sounds(conn, corpus, template, sound_cache)
