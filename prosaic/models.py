@@ -64,6 +64,7 @@ class Source(Base):
     __tablename__ = "sources"
 
     id = Column(INTEGER, primary_key=True)
+    # TODO Needs to be unique and not nil
     name = Column(TEXT)
     description = Column(TEXT)
     content = Column(TEXT)
@@ -97,6 +98,7 @@ class Corpus(Base):
     __tablename__ = "corpora"
 
     id = Column(INTEGER, primary_key=True)
+    # TODO Needs to be unique and not nil
     name = Column(TEXT)
 
     sources = relationship('Source', secondary=corpora_sources)

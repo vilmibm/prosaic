@@ -19,6 +19,7 @@ from os.path import join
 from subprocess import call
 import sys
 
+from sqlalchemy import text
 from sh import rm, cp
 
 from prosaic.models import Source, Corpus, get_session, get_engine, Database
@@ -62,6 +63,10 @@ class ProsaicArgParser(ArgumentParser):
     @property
     def session(self):
         return get_session(self.db)
+
+    @property
+    def engine(self):
+        return get_engine(self.db)
 
     @property
     def db(self) -> Database:
@@ -146,12 +151,23 @@ class ProsaicArgParser(ArgumentParser):
     # Actually define commands:
 
     def corpus_ls(self):
-        # TODO actually use corpus table
-        raise NotImplementedError("actually use corpora table")
+        session = self.session
+        for name in session.query(Corpus.name):
+            print(first(name))
 
     def corpus_rm(self):
-        # TODO actually use corpus table
-        raise NotImplementedError("actually use corpora table")
+        conn = self.engine.connect()
+        unlink_sql = """
+        delete from corpora_sources
+        where corpus_id = :corpus_id
+        """
+        # TODO there is a bug here until corpusname is unique
+        delete_sql = """
+        delete from corpora
+        where name = :corpus_name
+        """
+        conn.execute(text(unlink_sql).params(corpus_id=self.corpus.id))
+        conn.execute(text(delete_sql).params(corpus_name=self.corpus.name))
 
     def corpus_loadfile(self):
         # TODO stream this, don't slurp it.
@@ -224,7 +240,10 @@ def initialize_arg_parser():
                .set_defaults(func=parser.corpus_rm) \
                .add_dbhost() \
                .add_dbport() \
-               .add_argument('dbname', default=DEFAULT_DB, action='store')
+               .add_dbuser() \
+               .add_dbname() \
+               .add_dbpass() \
+               .add_argument('corpus', action='store')
 
     # poem commands
     poem_subs.add_parser('new') \
