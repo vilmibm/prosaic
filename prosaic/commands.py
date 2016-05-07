@@ -28,6 +28,8 @@ from prosaic.generation import poem_from_template
 from prosaic.cfg import DEFAULT_TEMPLATE_EXT, TEMPLATES, EXAMPLE_TEMPLATE, PG_HOST, PG_PORT, PG_USER, PG_PASS,DEFAULT_DB
 from prosaic.util import slurp, first
 
+# TODO add aliases (as specified in cli.md)
+
 class ProsaicArgParser(ArgumentParser):
     editor = environ.get('EDITOR')
     _template = None
@@ -274,9 +276,7 @@ class ProsaicArgParser(ArgumentParser):
         try:
             self.args.func()
         except AttributeError as e:
-            print('Caught fatal error: {}'.format(e))
-            # TODO
-            raise e
+            print('prosaic experienced a fatal error: {}'.format(e))
             self.print_help()
             return 1
 
