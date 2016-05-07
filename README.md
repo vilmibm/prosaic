@@ -71,7 +71,7 @@ a poem line by line.
 ```python
 from prosaic.models import db_engine
 from prosaic.parsing import process_text
-from prosaic.cthulhu import poem_from_template
+from prosaic.generate import poem_from_template
 
 db = db_engine('dbuser', 'dbpass', 'localhost', 5432)
 process_text("some very long string of text", "a name for this long string of text", db)
