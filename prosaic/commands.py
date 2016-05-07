@@ -210,6 +210,8 @@ class ProsaicArgParser(ArgumentParser):
             self.args.func()
         except AttributeError as e:
             print('Caught fatal error: {}'.format(e))
+            # TODO
+            raise e
             self.print_help()
             return 1
 
