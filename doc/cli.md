@@ -21,6 +21,12 @@ All subcommands are passed to the `prosaic` command:
 
 _aliases_: c, corpora
 
+* ls
+* rm
+* new
+* link
+* unlink
+
 ### ls
 
     prosaic corpus ls
@@ -55,13 +61,17 @@ Removes a source from a given corpus.
 
 _aliases_: s, sources
 
+* ls
+* rm
+* new
+
 ### ls
 
     prosaic source ls
 
 Lists all of the sources (ie files of text) that prosaick knows about.
 
-### source_name
+### rm
 
     prosaic source rm "source name"
 
@@ -81,6 +91,8 @@ is linked to a corpora.
 
 _aliases: p
 
+* new
+
 ### new
 
     prosaic poem new [-t "template name" -c "corpus name" -o "file name"]
@@ -94,6 +106,11 @@ Generate a new poem.
 ## template
 
 _aliases_: t, tmpl
+
+* ls
+* rm
+* new
+* edit
 
 ### ls
 
