@@ -21,6 +21,19 @@ from pymongo import MongoClient
 from pytest import fixture
 from sh import prosaic, rm
 
+# TODO this structure is good, but I think it makes wayyyy more sense to just
+# invoke prosaic.main() with prepared argument vectors. Just put in some prints
+# to figure out what argv looks like and then script from there. Ideally, sh
+# shouldn't be used here at all.
+# The big thing here is capturing STDOUT; there's got to be a way to do that,
+# will just take some research.
+
+# I definitely want unit tests but these tests are the top priority I think
+# just to catch any big holes in the work I've done for v4 so far.
+
+# I just looked and lol, there is basically no unit testing. So at least
+# there's not a ton of stuff to fix.
+
 TEST_DB = 'prosaic_test'
 TEST_PROSAIC_HOME = '/tmp/prosaic_test'
 # TODO pick shorter book lulz

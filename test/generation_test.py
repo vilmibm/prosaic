@@ -12,7 +12,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from prosaic.nyarlathotep import pre_process_text, pre_process_sentence
+from prosaic.generation import pre_process_text, pre_process_sentence
 
 
 def test_pre_process_text():
