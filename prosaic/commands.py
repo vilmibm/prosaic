@@ -38,39 +38,15 @@ class ProsaicArgParser(ArgumentParser):
 
     # Helpers and properties:
 
-    @property
-    def corpus(self):
-        if self._corpus is not None:
-            return self._corpus
+    def get_corpus(self, session) -> Corpus:
+        corpus = session.query(Corpus)\
+                   .filter(Corpus.name == self.args.corpus_name)\
+                   .one_or_none()
 
-        self._corpus = self.session.query(Corpus)\
-                       .filter(Corpus.name == self.args.corpus_name)\
-                       .one_or_none()
+        if corpus is None:
+            raise Exception('No such corpus found.')
 
-        if self._corpus is None:
-            print('creating new corpus {}...'.format(self.args.corpus_name))
-            self._corpus = Corpus(name=self.args.corpus_name)
-            self.session.add(self._corpus)
-            self.session.commit()
-
-        if self.args.corpus_name == '_prosaic':
-            print('updating default corpus...')
-            self._corpus.sources = self.session.query(Source).all()
-            self.session.add(self._corpus)
-            self.session.commit()
-
-        return self._corpus
-
-    @property
-    def source(self):
-        session = self.session
-        return session.query(Source)\
-                .filter(Source.name==self.args.source_name)\
-                .one()
-
-    @property
-    def session(self):
-        return get_session(self.db)
+        return corpus
 
     @property
     def engine(self):
@@ -110,6 +86,8 @@ class ProsaicArgParser(ArgumentParser):
             return None
         return join(TEMPLATES, '{}.{}'.format(self.args.tmplname, DEFAULT_TEMPLATE_EXT))
 
+    # TODO need to be able to override prosaic_home, ideally
+
     def add_dbhost(self):
         self.add_argument('--host', action='store', default=PG_HOST)
         return self
@@ -131,7 +109,7 @@ class ProsaicArgParser(ArgumentParser):
         return self
 
     def add_corpus(self):
-        self.add_argument('-c', '--corpus', action='store', default='_prosaic')
+        self.add_argument('-c', '--corpus', action='store')
         return self
 
     def add_db(self):
@@ -159,7 +137,7 @@ class ProsaicArgParser(ArgumentParser):
     # Actually define commands:
 
     def corpus_ls(self):
-        session = self.session
+        session = get_session(self.db)
         for name in session.query(Corpus.name):
             print(first(name))
 
@@ -174,41 +152,53 @@ class ProsaicArgParser(ArgumentParser):
         delete from corpora
         where name = :corpus_name
         """
-        conn.execute(text(unlink_sql).params(corpus_id=self.corpus.id))
-        conn.execute(text(delete_sql).params(corpus_name=self.corpus.name))
+        session = get_session(self.db)
+        corpus = self.get_corpus(session)
+        conn.execute(text(unlink_sql).params(corpus_id=corpus.id))
+        conn.execute(text(delete_sql).params(corpus_name=self.args.corpus_name))
 
     def corpus_link(self):
-        self.corpus.sources.append(self.source)
-        self.session.add(self.corpus)
-        self.session.commit()
+        session = get_session(self.db)
+        corpus = self.get_corpus(session)
+        #corpus = session.query(Corpus).filter(Corpus.name==self.args.corpus_name).one()
+        source = session.query(Source).filter(Source.name==self.args.source_name).one()
+        corpus.sources.append(source)
+        session.add(corpus)
+        session.commit()
 
     def corpus_unlink(self):
-        self.corpus.sources.remove(self.source)
-        self.session.add(self.corpus)
-        self.session.commit()
+        session = get_session(self.db)
+        corpus = self.get_corpus(session)
+        source = session.query(Source).filter(Source.name==self.args.source_name).one()
+        corpus.sources.remove(source)
+        session.add(corpus)
+        session.commit()
 
     def corpus_new(self):
+        session = get_session(self.db)
         corpus = Corpus(name=self.args.corpus_name,
                         description=self.args.corpus_desc)
-        self.session.add(corpus)
-        self.session.commit()
+        session.add(corpus)
+        session.commit()
 
     def corpus_sources(self):
-        if 0 == len(self.corpus.sources):
-            print("Corpus {} has no sources.".format(self.corpus.name))
+        session = get_session(self.db)
+        corpus = self.get_corpus(session)
+        if 0 == len(corpus.sources):
+            print("Corpus {} has no sources.".format(corpus.name))
             print("Use `prosaic corpus link 'corpus name' 'source name'` to add sources")
-        for source in self.corpus.sources:
+        for source in corpus.sources:
             print(source.name)
 
     def source_ls(self):
-        session = self.session
+        session = get_session(self.db)
         for name in session.query(Source.name):
             print(first(name))
 
     def source_rm(self):
         # ugh i know; TODO figure out how to do this with ORM
         conn = self.engine.connect()
-        session = self.session
+        session = get_session(self.db)
         unlink_sql = """
         delete from corpora_sources
         where source_id = :source_id
@@ -239,12 +229,14 @@ class ProsaicArgParser(ArgumentParser):
         process_text(self.db, source, text)
 
     def poem_new(self):
-        if 0 == len(self.corpus.sources):
-            print("Corpus {} has no sources.".format(self.corpus.name))
+        session = get_session(self.db)
+        corpus = self.get_corpus(session)
+        if 0 == len(corpus.sources):
+            print("Corpus {} has no sources.".format(corpus.name))
             print("Use `prosaic corpus link 'corpus name' 'source name'` to add sources")
             return
         template = self.template
-        poem_lines = map(first, poem_from_template(self.template, self.db, self.corpus))
+        poem_lines = map(first, poem_from_template(self.template, self.db, corpus.id))
         output_filename = self.args.output
         if output_filename:
             with open(output_filename, 'w') as f:
@@ -308,12 +300,12 @@ def initialize_arg_parser():
             .set_defaults(func=parser.corpus_new)\
             .add_db()\
             .add_argument('corpus_name', action='store')\
-            .add_argument('corpus_desc', action='store')
+            .add_argument('corpus_desc', action='store', default='', nargs='?')
     corpus_subs.add_parser('link')\
             .set_defaults(func=parser.corpus_link)\
             .add_db()\
             .add_argument('corpus_name', action='store')\
-            .add_argument('source_name', action='store')
+            .add_argument('source_name', action='store', default='', nargs='?')
     corpus_subs.add_parser('unlink')\
             .set_defaults(func=parser.corpus_unlink)\
             .add_db()\

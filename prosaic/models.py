@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from functools import lru_cache
 from sqlalchemy import create_engine, Column, Boolean, ForeignKey, Table
-from sqlalchemy.orm import relationship, sessionmaker, Session
+from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.engine import Engine
 from sqlalchemy.dialects.postgresql import ARRAY, TEXT, INTEGER
 from sqlalchemy.ext.declarative import declarative_base
@@ -47,9 +47,12 @@ def get_engine(db: Database) -> Engine:
     return create_engine('postgresql://{user}:{password}@{host}:{port}/{dbname}'\
            .format(**db))
 
-@lru_cache(maxsize=8)
-def get_session(db: Database) -> Session:
-    return sessionmaker(get_engine(db))()
+Session = sessionmaker()
+
+#@lru_cache(maxsize=8)
+def get_session(db: Database):
+    Session.configure(bind=get_engine(db))
+    return Session()
 
 # this is hardcoded for use in the repl
 db = Database(user='vilmibm', password='foobar')

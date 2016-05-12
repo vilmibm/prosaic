@@ -26,7 +26,7 @@ import prosaic.dogma as dogma
 from prosaic.models import Phrase, Corpus, Source, get_engine, Database
 from prosaic.util import pluck, is_empty, threaded, first, second
 
-def unique_sounds(conn: Connection, corpus: Corpus) -> [str]:
+def unique_sounds(conn: Connection, corpus_id: int) -> [str]:
     sql = """
         select distinct rhyme_sound 
         from phrases p 
@@ -34,19 +34,19 @@ def unique_sounds(conn: Connection, corpus: Corpus) -> [str]:
         on p.source_id = cs.source_id 
         where corpus_id = :corpus_id
     """
-    result = conn.execute(sa.text(sql).params(corpus_id=corpus.id)).fetchall()
+    result = conn.execute(sa.text(sql).params(corpus_id=corpus_id)).fetchall()
     return list(filter(lambda r: r is not None, map(lambda r: r[0], result)))
 
-def map_letters_to_sounds(conn: Connection, corpus, template, sound_cache=None):
+def map_letters_to_sounds(conn: Connection, corpus_id: int, template, sound_cache=None):
     letters = list(set(pluck(template, "rhyme")))
     if is_empty(letters):
         cache = {}
     else:
-        sounds = sound_cache if sound_cache is not None else unique_sounds(conn, corpus)
+        sounds = sound_cache if sound_cache is not None else unique_sounds(conn, corpus_id)
         cache = dict(map(lambda l: [l, choice(sounds)], letters))
     return cache
 
-def extract_rule(conn, corpus, letter_sound_map, raw_pair):
+def extract_rule(conn, corpus_id, letter_sound_map, raw_pair):
     rule_key = first(raw_pair)
     value = second(raw_pair)
     rule = None
@@ -54,17 +54,17 @@ def extract_rule(conn, corpus, letter_sound_map, raw_pair):
     if rule_key == 'rhyme': rule = dogma.RhymeRule(letter_sound_map.get(value))
     elif rule_key == 'blank': rule = dogma.BlankRule(conn)
     elif rule_key == 'alliteration': rule = dogma.AlliterationRule(value)
-    elif rule_key == 'keyword': rule = dogma.KeywordRule(value, conn, corpus)
-    elif rule_key == 'fuzzy': rule = dogma.FuzzyKeywordRule(value, conn, corpus)
+    elif rule_key == 'keyword': rule = dogma.KeywordRule(value, conn, corpus_id)
+    elif rule_key == 'fuzzy': rule = dogma.FuzzyKeywordRule(value, conn, corpus_id)
     elif rule_key == 'syllables': rule = dogma.SyllableCountRule(value)
 
     return rule
 
-def extract_ruleset(conn, corpus, letter_sound_map, template_line):
-    rules = map(partial(extract_rule, conn, corpus, letter_sound_map), template_line.items())
+def extract_ruleset(conn, corpus_id, letter_sound_map, template_line):
+    rules = map(partial(extract_rule, conn, corpus_id, letter_sound_map), template_line.items())
     return dogma.RuleSet(list(rules))
 
-def ruleset_to_line(conn, corpus: Corpus, ruleset) -> str:
+def ruleset_to_line(conn, corpus_id, ruleset) -> str:
     if ruleset.contains(dogma.BlankRule):
         return ("",)
 
@@ -72,20 +72,20 @@ def ruleset_to_line(conn, corpus: Corpus, ruleset) -> str:
     while not line:
         sql = ruleset.to_query(conn)
 
-        lines = conn.execute(sa.text(sql).params(corpus_id=corpus.id)).fetchall()
+        lines = conn.execute(sa.text(sql).params(corpus_id=corpus_id)).fetchall()
         if is_empty(lines):
             ruleset.weaken()
         else:
             line = choice(lines)
     return line
 
-def poem_from_template(template, db: Database, corpus, sound_cache=None):
+def poem_from_template(template, db: Database, corpus_id, sound_cache=None):
     engine = get_engine(db)
     conn = engine.connect()
     executor = ThreadPoolExecutor(4)
-    letter_sound_map = map_letters_to_sounds(conn, corpus, template, sound_cache)
-    process_tmpl_line = threaded(partial(extract_ruleset, conn, corpus, letter_sound_map),
-                                 partial(ruleset_to_line, conn, corpus))
+    letter_sound_map = map_letters_to_sounds(conn, corpus_id, template, sound_cache)
+    process_tmpl_line = threaded(partial(extract_ruleset, conn, corpus_id, letter_sound_map),
+                                 partial(ruleset_to_line, conn, corpus_id))
     poem_lines = executor.map(process_tmpl_line, template)
     executor.shutdown()
     return list(poem_lines)
