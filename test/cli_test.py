@@ -12,92 +12,122 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from contextlib import redirect_stdout
 from functools import partial
-from os import environ
+import io
 from os.path import join
+from shutil import rmtree
 import sys
 
-from pymongo import MongoClient
-from pytest import fixture
-from sh import prosaic, rm
+from pytest import fixture, yield_fixture
+from sqlalchemy import text
 
-# TODO this structure is good, but I think it makes wayyyy more sense to just
-# invoke prosaic.main() with prepared argument vectors. Just put in some prints
-# to figure out what argv looks like and then script from there. Ideally, sh
-# shouldn't be used here at all.
-# The big thing here is capturing STDOUT; there's got to be a way to do that,
-# will just take some research.
+import prosaic.models as m
+from prosaic.models import Corpus
+from prosaic import main
 
-# I definitely want unit tests but these tests are the top priority I think
-# just to catch any big holes in the work I've done for v4 so far.
-
-# I just looked and lol, there is basically no unit testing. So at least
-# there's not a ton of stuff to fix.
-
-TEST_DB = 'prosaic_test'
 TEST_PROSAIC_HOME = '/tmp/prosaic_test'
 # TODO pick shorter book lulz
 TEST_CORPUS_PATH = './pride.txt'
+DB = m.Database(user='vilmibm', password='foobar', dbname='prosaic_test')
 
-@fixture(scope='module')
-def env(request):
-    environ['PROSAIC_HOME'] = TEST_PROSAIC_HOME
-    environ['EDITOR'] = 'echo'
-    request.addfinalizer(partial(rm, '-rf', TEST_PROSAIC_HOME))
-    return None
+def prosaic(*args) -> int:
+    """Helper function for running prosaic.main, mimicking use from the command
+    line. Sets argv to be ['prosaic'] + whatever is passed as args. Returns the
+    exit code prosaic would have returned."""
+    sys.argv = ['prosaic'] + list(args) + ['-d', 'prosaic_test', '--user', 'vilmibm', '--password', 'foobar']
+    return main()
 
-@fixture(scope='module')
-def client(request):
-    request.addfinalizer(lambda: MongoClient().drop_database(TEST_DB))
-    return MongoClient()
+@yield_fixture(scope='module')
+def cleanup(request):
+    yield None
+    rmtree(TEST_PROSAIC_HOME)
+
+@yield_fixture(scope='function')
+def db(request):
+    engine = m.get_engine(DB)
+    m.Base.metadata.create_all(engine)
+    conn = engine.connect()
+    yield conn
+    conn.close()
+    m.Session.close_all()
+    m.Base.metadata.drop_all(engine)
 
 class TestCorpusCommands:
 
-    def test_loadfile(self, env, client):
-        client.drop_database(TEST_DB)
-        prosaic('corpus', 'loadfile', '-dprosaic_test', TEST_CORPUS_PATH)
-        assert client[TEST_DB].phrases.count() > 0
+    def test_new_with_desc(self, cleanup, db):
+        corpus_desc = 'a fun corpus'
+        corpus_name = 'whee'
+        assert 0 == prosaic('corpus', 'new', corpus_name, corpus_desc)
+        corpus = db.execute(
+            text("select name,description from corpora where name=:corpus_name")\
+            .params(corpus_name=corpus_name)
+        ).fetchone()
+        assert corpus[0] == corpus_name
+        assert corpus[1] == corpus_desc
 
-    def test_ls(self, env):
-        out = prosaic('corpus', 'ls').split('\n')
-        assert "prosaic_test" in out
+    def test_ls(self, cleanup, db):
+        corpora_names = ['a', 'b', 'c', 'd']
+        for name in corpora_names:
+            prosaic('corpus', 'new', name)
 
-    def test_rm(self, env, client):
-        client.drop_database(TEST_DB)
-        out = prosaic('corpus', 'ls').split('\n')
-        assert "prosaic_test" not in out
+        buff = io.StringIO()
+        with redirect_stdout(buff):
+            assert 0 == prosaic('corpus', 'ls')
+        buff.seek(0)
+        result = buff.read()
+        output_names = set(result.split('\n')[0:-1])
+        assert len(output_names.intersection(set(corpora_names))) == len(corpora_names)
+        
+    def test_rm(self, cleanup, db):
+        name = 'e'
+        prosaic('corpus', 'new', name)
+        find = text("select name from corpora where name=:name").params(name=name)
+        results = db.execute(find).fetchall()
+        assert 1 == len(results)
+        assert 0 == prosaic('corpus', 'rm', name)
+        results = db.execute(find).fetchall()
+        assert 0 == len(results)
 
+    def test_link(self, cleanup, db):
+        pass
 
-class TestPoemCommands:
-    def test_new_with_template(self, env, client):
-        # tests template choosing, blank rule
-        prosaic('corpus', 'loadfile', '-dprosaic_test', TEST_CORPUS_PATH)
-        out = prosaic('poem', 'new', '-tsonnet', '-dprosaic_test')
-        assert len(out.split('\n')) >= 17
+    def test_unlink(self, cleanup, db):
+        pass
 
-    def test_new_with_default(self, env):
-        out = prosaic('poem', 'new', '-dprosaic_test')
-        assert len(out.split('\n')) >= 3
+    def test_sources(self, cleanup, db):
+        pass
 
-class TestTemplateCommands:
-    def test_new(self, env):
-        prosaic('template', 'new', 'hello')
-        template_path = join(TEST_PROSAIC_HOME, 'templates', 'hello.json')
-        lines = open(template_path).readlines()
-        assert len(lines) > 1
-
-    def test_ls(self, env):
-        out = prosaic('template', 'ls')
-        assert len(out.split('\n')) > 4
-        assert 'hello' in out
-
-    def test_edit(self, env):
-        out = prosaic('template', 'edit', 'hello')
-        assert out == '/tmp/prosaic_test/templates/hello.json\n'
-
-    def test_rm(self, env):
-        prosaic('template', 'rm', 'hello')
-        out = prosaic('template', 'ls')
-        assert 'hello' not in out
-
+#class TestPoemCommands:
+#    def test_new_with_template(self, env, client):
+#        # tests template choosing, blank rule
+#        prosaic('corpus', 'loadfile', '-dprosaic_test', TEST_CORPUS_PATH)
+#        out = prosaic('poem', 'new', '-tsonnet', '-dprosaic_test')
+#        assert len(out.split('\n')) >= 17
+#
+#    def test_new_with_default(self, env):
+#        out = prosaic('poem', 'new', '-dprosaic_test')
+#        assert len(out.split('\n')) >= 3
+#
+#class TestTemplateCommands:
+#    def test_new(self, env):
+#        prosaic('template', 'new', 'hello')
+#        template_path = join(TEST_PROSAIC_HOME, 'templates', 'hello.json')
+#        lines = open(template_path).readlines()
+#        assert len(lines) > 1
+#
+#    def test_ls(self, env):
+#        out = prosaic('template', 'ls')
+#        assert len(out.split('\n')) > 4
+#        assert 'hello' in out
+#
+#    def test_edit(self, env):
+#        out = prosaic('template', 'edit', 'hello')
+#        assert out == '/tmp/prosaic_test/templates/hello.json\n'
+#
+#    def test_rm(self, env):
+#        prosaic('template', 'rm', 'hello')
+#        out = prosaic('template', 'ls')
+#        assert 'hello' not in out
+#
 
