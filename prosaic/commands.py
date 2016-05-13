@@ -345,15 +345,20 @@ def initialize_arg_parser():
              .add_db()
 
     # template commands
-    template_subs.add_parser('ls').set_defaults(func=parser.template_ls)
+    template_subs.add_parser('ls')\
+                 .set_defaults(func=parser.template_ls)\
+                 .add_db()
     template_subs.add_parser('rm') \
                  .set_defaults(func=parser.template_rm) \
-                 .add_argument('tmplname', action='store')
+                 .add_argument('tmplname', action='store')\
+                 .add_db()
     template_subs.add_parser('new') \
                  .set_defaults(func=parser.template_new) \
-                 .add_argument('tmplname', action='store')
+                 .add_argument('tmplname', action='store')\
+                 .add_db()
     template_subs.add_parser('edit') \
                  .set_defaults(func=parser.template_edit) \
-                 .add_argument('tmplname', action='store')
+                 .add_argument('tmplname', action='store')\
+                 .add_db()
 
     return parser

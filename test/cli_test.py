@@ -48,7 +48,7 @@ def prosaic(*args) -> Result:
     lines = set(result.split('\n')[0:-1])
     return Result(lines=lines, code=code)
 
-@yield_fixture(scope='module')
+@yield_fixture(scope='function')
 def cleanup(request):
     yield None
     rmtree(TEST_PROSAIC_HOME)
@@ -150,23 +150,31 @@ class TestCorpusCommands:
 #        out = prosaic('poem', 'new', '-dprosaic_test')
 #        assert len(out.split('\n')) >= 3
 #
-#class TestTemplateCommands:
-#    def test_new(self, env):
-#        prosaic('template', 'new', 'hello')
-#        template_path = join(TEST_PROSAIC_HOME, 'templates', 'hello.json')
-#        lines = open(template_path).readlines()
-#        assert len(lines) > 1
-#
-#    def test_ls(self, env):
-#        out = prosaic('template', 'ls')
-#        assert len(out.split('\n')) > 4
-#        assert 'hello' in out
-#
-#    def test_edit(self, env):
-#        out = prosaic('template', 'edit', 'hello')
-#        assert out == '/tmp/prosaic_test/templates/hello.json\n'
-#
-#    def test_rm(self, env):
-#        prosaic('template', 'rm', 'hello')
-#        out = prosaic('template', 'ls')
-#        assert 'hello' not in out
+class TestTemplateCommands:
+    def test_new(self, cleanup):
+        assert 0 == prosaic('template', 'new', 'hello').code
+        template_path = join(TEST_PROSAIC_HOME, 'templates', 'hello.json')
+        lines = open(template_path).readlines()
+        assert len(lines) > 1
+
+    def test_ls(self, cleanup):
+        prosaic('template', 'new', 'hello')
+        code, lines = prosaic('template', 'ls')
+        assert 0 == code
+        assert len(lines) > 4
+        assert 'hello' in lines
+
+    def test_edit(self, cleanup):
+        code, lines = prosaic('template', 'edit', 'hello')
+        assert 0 == code
+        # TODO doing proper output redirection has made this not work, not
+        # really sure how to test this now (also need to run the tests with
+        # EDITOR=echo
+        # assert '/tmp/prosaic_test/templates/hello.json' in lines
+
+    def test_rm(self, cleanup):
+        prosaic('template', 'new', 'hello')
+        code, _ = prosaic('template', 'rm', 'hello')
+        assert 0 == code
+        _, lines = prosaic('template', 'ls')
+        assert 'hello' not in lines
