@@ -29,7 +29,7 @@ from prosaic import main
 
 TEST_PROSAIC_HOME = '/tmp/prosaic_test'
 # TODO pick shorter book lulz
-TEST_CORPUS_PATH = './pride.txt'
+TEST_SOURCE_PATH = './pride.txt'
 DB = m.Database(user='vilmibm', password='foobar', dbname='prosaic_test')
 db_args = ['-d', 'prosaic_test', '--user', 'vilmibm', '--password', 'foobar']
 Result = namedtuple('Result', ['code', 'lines'])
@@ -139,17 +139,32 @@ class TestCorpusCommands:
         assert 0 == code
         assert set(lines).issuperset(set(['flarf']))
 
-#class TestPoemCommands:
-#    def test_new_with_template(self, env, client):
-#        # tests template choosing, blank rule
-#        prosaic('corpus', 'loadfile', '-dprosaic_test', TEST_CORPUS_PATH)
-#        out = prosaic('poem', 'new', '-tsonnet', '-dprosaic_test')
-#        assert len(out.split('\n')) >= 17
-#
-#    def test_new_with_default(self, env):
-#        out = prosaic('poem', 'new', '-dprosaic_test')
-#        assert len(out.split('\n')) >= 3
-#
+class TestSourceCommands:
+    def test_new_with_desc(self, db):
+        # TODO
+        pass
+
+    def test_new_without_desc(self, db):
+        # TODO
+        pass
+
+    def test_ls(self, db):
+        # TODO
+        pass
+
+    def test_rm(self, db):
+        # TODO
+        pass
+
+class TestPoemCommands:
+    def test_new_with_template(self, db):
+        # TODO
+        pass
+
+    def test_new_with_default_template(self, db):
+        # TODO
+        pass
+
 class TestTemplateCommands:
     def test_new(self, cleanup):
         assert 0 == prosaic('template', 'new', 'hello').code
