@@ -57,9 +57,7 @@ def cleanup(request):
 def db(request):
     engine = m.get_engine(DB)
     m.Base.metadata.create_all(engine)
-    conn = engine.connect()
-    yield conn
-    conn.close()
+    yield m.get_session(DB)
     m.Session.close_all()
     m.Base.metadata.drop_all(engine)
 
@@ -68,44 +66,69 @@ class TestCorpusCommands:
     def test_new_with_desc(self, cleanup, db):
         corpus_desc = 'a fun corpus'
         corpus_name = 'whee'
-        assert 0 == prosaic('corpus', 'new', corpus_name, corpus_desc)
-        corpus = db.execute(
-            text("select name,description from corpora where name=:corpus_name")\
-            .params(corpus_name=corpus_name)
-        ).fetchone()
-        assert corpus[0] == corpus_name
-        assert corpus[1] == corpus_desc
+        assert 0 == prosaic('corpus', 'new', corpus_name, corpus_desc).code
+        corpus = db.query(Corpus).filter(Corpus.name==corpus_name).one()
+        assert corpus.name == corpus_name
+        assert corpus.description == corpus_desc
+
+    def test_new_without_desc(self, cleanup, db):
+        # TODO
+        pass
 
     def test_ls(self, cleanup, db):
         corpora_names = ['a', 'b', 'c', 'd']
         for name in corpora_names:
             prosaic('corpus', 'new', name)
 
-        buff = io.StringIO()
-        with redirect_stdout(buff):
-            assert 0 == prosaic('corpus', 'ls')
-        buff.seek(0)
-        result = buff.read()
-        output_names = set(result.split('\n')[0:-1])
-        assert len(output_names.intersection(set(corpora_names))) == len(corpora_names)
+        result = prosaic('corpus', 'ls')
+        assert 0 == result.code
+        assert len(result.lines.intersection(set(corpora_names))) == len(corpora_names)
         
     def test_rm(self, cleanup, db):
         name = 'e'
         prosaic('corpus', 'new', name)
-        find = text("select name from corpora where name=:name").params(name=name)
-        results = db.execute(find).fetchall()
-        assert 1 == len(results)
-        assert 0 == prosaic('corpus', 'rm', name)
-        results = db.execute(find).fetchall()
-        assert 0 == len(results)
+        corpora = db.query(Corpus).filter(Corpus.name==name).all()
+        assert 1 == len(corpora)
+        assert 0 == prosaic('corpus', 'rm', name).code
+        corpora = db.query(Corpus).filter(Corpus.name==name).all()
+        assert 0 == len(corpora)
 
     def test_link(self, cleanup, db):
-        pass
+        flarf = Source(name='flarf', description='blah', content='lol naw')
+        puke = Source(name='puke', description='blah', content='lol naw')
+        corpus = Corpus(name='whee', description='bleh')
+        db.add_all([corpus, flarf, puke])
+        db.commit()
+        assert 0 == prosaic('corpus', 'link', 'whee', 'flarf').code
+        assert 0 == prosaic('corpus', 'link', 'whee', 'puke').code
+        db.refresh(corpus)
+        assert set([puke, flarf]) == set(corpus.sources)
 
     def test_unlink(self, cleanup, db):
-        pass
+        flarf = Source(name='flarf', description='blah', content='lol naw')
+        puke = Source(name='puke', description='blah', content='lol naw')
+        corpus = Corpus(name='whee', description='bleh')
+        db.add_all([corpus, flarf, puke])
+        db.commit()
+        prosaic('corpus', 'link', 'whee', 'flarf')
+        prosaic('corpus', 'link', 'whee', 'puke')
+        db.refresh(corpus)
+        assert set([puke, flarf]) == set(corpus.sources)
+        assert 0 == prosaic('corpus', 'unlink', 'whee', 'flarf').code
+        db.refresh(corpus)
+        assert [puke] == corpus.sources
+        assert 0 == prosaic('corpus', 'unlink', 'whee', 'puke').code
+        db.refresh(corpus)
+        assert 0 == len(corpus.sources)
 
     def test_sources(self, cleanup, db):
+        # make a source and commit it
+        # link it
+        # check via db that it's there
+        # assert it appears on stdout
+        # unlink it
+        # check via db that it's gone
+        # assert it does not appear on stdout
         pass
 
 #class TestPoemCommands:
@@ -139,5 +162,3 @@ class TestCorpusCommands:
 #        prosaic('template', 'rm', 'hello')
 #        out = prosaic('template', 'ls')
 #        assert 'hello' not in out
-#
-
