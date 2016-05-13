@@ -62,7 +62,6 @@ def db(request):
     m.Base.metadata.drop_all(engine)
 
 class TestCorpusCommands:
-
     def test_new_with_desc(self, cleanup, db):
         corpus_desc = 'a fun corpus'
         corpus_name = 'whee'
@@ -72,8 +71,10 @@ class TestCorpusCommands:
         assert corpus.description == corpus_desc
 
     def test_new_without_desc(self, cleanup, db):
-        # TODO
-        pass
+        corpus_name = 'whee'
+        assert 0 == prosaic('corpus', 'new', corpus_name).code
+        corpus = db.query(Corpus).filter(Corpus.name==corpus_name).one()
+        assert corpus.name == corpus_name
 
     def test_ls(self, cleanup, db):
         corpora_names = ['a', 'b', 'c', 'd']
@@ -122,14 +123,21 @@ class TestCorpusCommands:
         assert 0 == len(corpus.sources)
 
     def test_sources(self, cleanup, db):
-        # make a source and commit it
-        # link it
-        # check via db that it's there
-        # assert it appears on stdout
-        # unlink it
-        # check via db that it's gone
-        # assert it does not appear on stdout
-        pass
+        flarf = Source(name='flarf', description='blah', content='lol naw')
+        puke = Source(name='puke', description='blah', content='lol naw')
+        corpus = Corpus(name='whee', description='bleh')
+        db.add_all([corpus, flarf, puke])
+        db.commit()
+        prosaic('corpus', 'link', 'whee', 'flarf')
+        prosaic('corpus', 'link', 'whee', 'puke')
+        db.refresh(corpus)
+        code, lines = prosaic('corpus', 'sources', 'whee')
+        assert 0 == code
+        assert set(lines).issuperset(set(['flarf', 'puke']))
+        prosaic('corpus', 'unlink', 'whee', 'puke').code
+        code, lines = prosaic('corpus', 'sources', 'whee')
+        assert 0 == code
+        assert set(lines).issuperset(set(['flarf']))
 
 #class TestPoemCommands:
 #    def test_new_with_template(self, env, client):
