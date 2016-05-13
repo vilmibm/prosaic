@@ -12,6 +12,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from collections import namedtuple
 from contextlib import redirect_stdout
 from functools import partial
 import io
@@ -23,20 +24,29 @@ from pytest import fixture, yield_fixture
 from sqlalchemy import text
 
 import prosaic.models as m
-from prosaic.models import Corpus
+from prosaic.models import Corpus, Source
 from prosaic import main
 
 TEST_PROSAIC_HOME = '/tmp/prosaic_test'
 # TODO pick shorter book lulz
 TEST_CORPUS_PATH = './pride.txt'
 DB = m.Database(user='vilmibm', password='foobar', dbname='prosaic_test')
+db_args = ['-d', 'prosaic_test', '--user', 'vilmibm', '--password', 'foobar']
+Result = namedtuple('Result', ['code', 'lines'])
 
-def prosaic(*args) -> int:
+def prosaic(*args) -> Result:
     """Helper function for running prosaic.main, mimicking use from the command
     line. Sets argv to be ['prosaic'] + whatever is passed as args. Returns the
     exit code prosaic would have returned."""
-    sys.argv = ['prosaic'] + list(args) + ['-d', 'prosaic_test', '--user', 'vilmibm', '--password', 'foobar']
-    return main()
+    sys.argv = ['prosaic'] + list(args) + db_args
+    buff = io.StringIO()
+    code = None
+    with redirect_stdout(buff):
+        code = main()
+    buff.seek(0)
+    result = buff.read()
+    lines = set(result.split('\n')[0:-1])
+    return Result(lines=lines, code=code)
 
 @yield_fixture(scope='module')
 def cleanup(request):
