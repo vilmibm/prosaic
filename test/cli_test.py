@@ -15,6 +15,7 @@
 from collections import namedtuple
 from contextlib import redirect_stdout
 import io
+from os import environ
 from os.path import join
 from shutil import rmtree
 import sys
@@ -25,10 +26,11 @@ import prosaic.models as m
 from prosaic.models import Corpus, Source
 from prosaic import main
 
+environ['EDITOR'] = 'echo'
 TEST_PROSAIC_HOME = '/tmp/prosaic_test'
 # TODO pick shorter book lulz
 TEST_SOURCE_PATH = './pride.txt'
-DB = m.Database(user='vilmibm', password='foobar', dbname='prosaic_test')
+DB = m.Database(user=os.getlogin(), password='foobar', dbname='prosaic_test')
 db_args = ['-d', 'prosaic_test', '--user', 'vilmibm', '--password', 'foobar']
 Result = namedtuple('Result', ['code', 'lines'])
 
