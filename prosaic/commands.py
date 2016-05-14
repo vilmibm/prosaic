@@ -333,7 +333,7 @@ def initialize_arg_parser():
             .add_db()\
             .add_argument('source_name', action='store')\
             .add_argument('path', action='store')\
-            .add_argument('source_description', action='store', default='')
+            .add_argument('source_description', action='store', default='', nargs='?')
 
     # poem commands
     poem_subs.add_parser('new') \
