@@ -14,14 +14,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from collections import namedtuple
 from contextlib import redirect_stdout
-from functools import partial
 import io
 from os.path import join
 from shutil import rmtree
 import sys
 
-from pytest import fixture, yield_fixture
-from sqlalchemy import text
+from pytest import yield_fixture
 
 import prosaic.models as m
 from prosaic.models import Corpus, Source
@@ -84,7 +82,7 @@ class TestCorpusCommands:
         result = prosaic('corpus', 'ls')
         assert 0 == result.code
         assert len(result.lines.intersection(set(corpora_names))) == len(corpora_names)
-        
+
     def test_rm(self, cleanup, db):
         name = 'e'
         prosaic('corpus', 'new', name)
@@ -137,33 +135,69 @@ class TestCorpusCommands:
         prosaic('corpus', 'unlink', 'whee', 'puke').code
         code, lines = prosaic('corpus', 'sources', 'whee')
         assert 0 == code
-        assert set(lines).issuperset(set(['flarf']))
+        assert lines.issuperset(set(['flarf']))
 
 class TestSourceCommands:
-    def test_new_with_desc(self, db):
-        # TODO
+    def test_new_with_desc(self, db, cleanup):
+        code, _ = prosaic('source', 'new', 'blargh', TEST_SOURCE_PATH, 'ugh')
+        assert 0 == code
+        source = db.query(Source).filter(Source.name=='blargh').one()
+        assert source.name == 'blargh'
+        assert source.description == 'ugh'
+        assert len(source.content) > 400
+        assert len(source.phrases) > 100
+
+    def test_new_without_desc(self, db, cleanup):
+        code, _ = prosaic('source', 'new', 'blargh', TEST_SOURCE_PATH)
+        assert 0 == code
+        source = db.query(Source).filter(Source.name=='blargh').one()
+        assert source.name == 'blargh'
+        assert source.description == ''
+        assert len(source.content) > 400
+        assert len(source.phrases) > 100
         pass
 
-    def test_new_without_desc(self, db):
-        # TODO
-        pass
+    def test_ls(self, db, cleanup):
+        source_names = ['blarf', 'flarf', 'narf']
+        for name in source_names:
+            db.add(Source(name=name))
+        db.commit()
+        code, lines = prosaic('source', 'ls')
+        assert 0 == code
+        assert lines.issuperset(set(source_names))
 
-    def test_ls(self, db):
-        # TODO
-        pass
-
-    def test_rm(self, db):
-        # TODO
-        pass
+    def test_rm(self, db, cleanup):
+        source_names = ['blarf', 'flarf', 'narf']
+        for name in source_names:
+            db.add(Source(name=name))
+        db.commit()
+        assert 3 == db.query(Source).count()
+        code, _ = prosaic('source', 'rm', 'flarf')
+        assert 0 == code
+        code, _ = prosaic('source', 'rm', 'narf')
+        assert 0 == code
+        assert 1 == db.query(Source).count()
 
 class TestPoemCommands:
-    def test_new_with_template(self, db):
-        # TODO
-        pass
+    def test_new_with_template(self, db, cleanup):
+        script = [['source', 'new', 'flarf', TEST_SOURCE_PATH],
+                  ['corpus', 'new', 'puke'],
+                  ['corpus', 'link', 'puke', 'flarf']]
+        results = map(lambda x: prosaic(*x).code, script)
+        assert not any(results)
+        code, lines = prosaic('poem', 'new', '-c', 'puke', '-t', 'sonnet')
+        assert 0 == code
+        assert len(lines) >= 14
 
-    def test_new_with_default_template(self, db):
-        # TODO
-        pass
+    def test_new_with_default_template(self, db, cleanup):
+        script = [['source', 'new', 'flarf', TEST_SOURCE_PATH],
+                  ['corpus', 'new', 'puke'],
+                  ['corpus', 'link', 'puke', 'flarf'],]
+        results = map(lambda x: prosaic(*x).code, script)
+        assert not any(results)
+        code, lines = prosaic('poem', 'new', '-c', 'puke')
+        assert 0 == code
+        assert len(lines) == 3
 
 class TestTemplateCommands:
     def test_new(self, cleanup):
