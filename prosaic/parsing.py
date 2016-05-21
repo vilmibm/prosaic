@@ -55,7 +55,6 @@ def process_text(db: Database, source: Source, raw_text: str) -> None:
     for x in range(0, len(sentences)):
         sentence = pre_process_sentence(sentences[x])
 
-        phonemes = list(map(nlp.word_to_phonemes, nlp.words(sentence)))
         stems = nlp.stem_sentence(sentence)
         rhyme_sound = nlp.rhyme_sound(sentence)
         syllables = nlp.count_syllables(sentence)
