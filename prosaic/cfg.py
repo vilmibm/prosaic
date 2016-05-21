@@ -16,10 +16,9 @@ from getpass import getuser
 from os import environ
 from os.path import expanduser, join
 
-PG_USER = environ.get('PROSAIC_DBUSER', getuser())
-# TODO default pass should be prosaic
-PG_PASS = environ.get('PROSAIC_DBPASS', 'foobar')
-PG_HOST = environ.get('PROSAIC_DBHOST', 'localhost')
+PG_USER = environ.get('PROSAIC_DBUSER', 'prosaic')
+PG_PASS = environ.get('PROSAIC_DBPASS', 'prosaic')
+PG_HOST = environ.get('PROSAIC_DBHOST', '127.0.0.1')
 PG_PORT = int(environ.get('PROSAIC_DBPORT', 5432))
 DEFAULT_DB = environ.get('PROSAIC_DBNAME', 'prosaic')
 PROSAIC_HOME = environ.get('PROSAIC_HOME', join(expanduser('~'), '.prosaic'))

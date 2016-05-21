@@ -30,8 +30,8 @@ environ['EDITOR'] = 'echo'
 TEST_PROSAIC_HOME = '/tmp/prosaic_test'
 # TODO pick shorter book lulz
 TEST_SOURCE_PATH = './pride.txt'
-DB = m.Database(user=os.getlogin(), password='foobar', dbname='prosaic_test')
-db_args = ['-d', 'prosaic_test', '--user', 'vilmibm', '--password', 'foobar']
+DB = m.Database(user='prosaic', password='prosaic', dbname='prosaic_test')
+db_args = ['-d', 'prosaic_test', '--user', 'prosaic', '--password', 'prosaic']
 Result = namedtuple('Result', ['code', 'lines'])
 
 def prosaic(*args) -> Result:

@@ -54,9 +54,6 @@ def get_session(db: Database):
     Session.configure(bind=get_engine(db))
     return Session()
 
-# this is hardcoded for use in the repl
-db = Database(user='vilmibm', password='foobar')
-
 Base = declarative_base()
 
 corpora_sources = Table('corpora_sources', Base.metadata,
