@@ -12,24 +12,22 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from argparse import ArgumentParser, FileType
+from argparse import ArgumentParser
 from json import loads
-from os import environ, listdir
-from os.path import join
+from os import environ, listdir, remove
+from os.path import join, exists
+from shutil import copyfile
 from subprocess import call
-import sys
 
 from sqlalchemy import text
-from sh import rm, cp
 
 from prosaic.models import Source, Corpus, get_session, get_engine, Database
 from prosaic.parsing import process_text
 from prosaic.generation import poem_from_template
-from prosaic.cfg import DEFAULT_TEMPLATE_EXT, TEMPLATES, EXAMPLE_TEMPLATE, PG_HOST, PG_PORT, PG_USER, PG_PASS,DEFAULT_DB
+import prosaic.cfg as cfg
 from prosaic.util import slurp, first
 
 # TODO add aliases (as specified in cli.md)
-
 class ProsaicArgParser(ArgumentParser):
     editor = environ.get('EDITOR')
     _template = None
@@ -37,6 +35,10 @@ class ProsaicArgParser(ArgumentParser):
     _corpus = None
 
     # Helpers and properties:
+
+    def __init__(self):
+        super().__init__()
+        self.add_argument('--home', action='store', default=cfg.DEFAULT_PROSAIC_HOME)
 
     def get_corpus(self, session) -> Corpus:
         corpus = session.query(Corpus)\
@@ -49,6 +51,10 @@ class ProsaicArgParser(ArgumentParser):
         return corpus
 
     @property
+    def template_path(self):
+        return join(self.args.home, 'templates')
+
+    @property
     def engine(self):
         return get_engine(self.db)
 
@@ -57,70 +63,34 @@ class ProsaicArgParser(ArgumentParser):
         if self._db:
             return self._db
 
-        self._db = Database(user=self.args.user,
-                            password=self.args.password,
-                            host=self.args.host,
-                            dbname=self.args.dbname,
-                            port=self.args.port)
+        self._db = Database(**self.config['database'])
         return self._db
 
     @property
     def template(self):
-        if not self.args:
-            return None
-
+        """Returns the template in JSON form"""
         if self._template:
             return self._template
 
-        if self.args.tmpl_raw:
-            template_path = ''.join(self.args.infile.readlines())
-        else:
-            template_path = self.read_template(self.args.tmpl)
+        template_json = self.read_template(self.args.tmplname)
 
-        self._template = loads(template_path)
+        self._template = loads(template_json)
         return self._template
 
     @property
     def template_abspath(self):
-        if not self.args:
-            return None
-        return join(TEMPLATES, '{}.{}'.format(self.args.tmplname, DEFAULT_TEMPLATE_EXT))
-
-    # TODO need to be able to override prosaic_home, ideally
-
-    def add_dbhost(self):
-        self.add_argument('--host', action='store', default=PG_HOST)
-        return self
-
-    def add_dbpass(self):
-        self.add_argument('--password', action='store', default=PG_PASS)
-        return self
-
-    def add_dbuser(self):
-        self.add_argument('--user', action='store', default=PG_USER)
-        return self
-
-    def add_dbport(self):
-        self.add_argument('-p', '--port', action='store', default=PG_PORT)
-        return self
-
-    def add_dbname(self):
-        self.add_argument('-d', '--dbname', action='store', default=DEFAULT_DB)
-        return self
+        """Returns the absolute path to the template"""
+        return join(self.template_path, '{}.{}'.format(self.args.tmplname, 'json'))
 
     def add_corpus(self):
         self.add_argument('-c', '--corpus', action='store')
-        return self
-
-    def add_db(self):
-        self.add_dbhost().add_dbport().add_dbname().add_dbuser().add_dbpass()
         return self
 
     def read_template(self, filename):
         if filename.startswith('/'):
             path = filename
         else:
-            path = join(TEMPLATES, '{}.{}'.format(filename, DEFAULT_TEMPLATE_EXT))
+            path = self.template_abspath
 
         return slurp(path)
 
@@ -160,7 +130,6 @@ class ProsaicArgParser(ArgumentParser):
     def corpus_link(self):
         session = get_session(self.db)
         corpus = self.get_corpus(session)
-        #corpus = session.query(Corpus).filter(Corpus.name==self.args.corpus_name).one()
         source = session.query(Source).filter(Source.name==self.args.source_name).one()
         corpus.sources.append(source)
         session.add(corpus)
@@ -249,22 +218,31 @@ class ProsaicArgParser(ArgumentParser):
     def template_ls(self):
         template_files = filter(lambda s: not s.startswith('.'), listdir(TEMPLATES))
         # TODO this will be weird once we support non json templates:
-        without_ext = map(lambda s: s.replace('.' + DEFAULT_TEMPLATE_EXT, ''), template_files)
+        without_ext = map(lambda s: s.replace('.json', ''), template_files)
         for filename in without_ext:
             print(filename)
 
     def template_rm(self):
-        rm(self.template_abspath)
+        remove(self.template_abspath)
 
     def template_new(self):
-        cp(EXAMPLE_TEMPLATE, self.template_abspath)
+        example_template = join(self.template_path, '.example.template')
+        copyfile(example_template, self.template_abspath)
         call([self.editor, self.template_abspath])
 
     def template_edit(self):
+        if not exists(self.template_abspath):
+            example_template = join(self.template_path, '.example.template')
+            copyfile(example_template, self.template_abspath)
         call([self.editor, self.template_abspath])
 
-    def dispatch(self):
-        self.args = self.parse_args()
+    def dispatch(self, args, config):
+        self.args = args
+        self.config = config
+
+        if getattr(self.args, 'tmplname', None) is None:
+            self.args.tmplname = self.config.get('default_template', cfg.DEFAULT_TEMPLATE))
+
         try:
             self.args.func()
         except AttributeError as e:
@@ -290,47 +268,35 @@ def initialize_arg_parser():
     template_parser = subparsers.add_parser('template')
     template_subs = template_parser.add_subparsers()
 
-
-    # TODO this can probably be deleted
-    parser.add_argument('infile', nargs='?', type=FileType('r'), default=sys.stdin)
-
     # corpus commands
-    corpus_subs.add_parser('ls').set_defaults(func=parser.corpus_ls).add_db()
+    corpus_subs.add_parser('ls').set_defaults(func=parser.corpus_ls)
     corpus_subs.add_parser('new')\
             .set_defaults(func=parser.corpus_new)\
-            .add_db()\
             .add_argument('corpus_name', action='store')\
             .add_argument('corpus_desc', action='store', default='', nargs='?')
     corpus_subs.add_parser('link')\
             .set_defaults(func=parser.corpus_link)\
-            .add_db()\
             .add_argument('corpus_name', action='store')\
             .add_argument('source_name', action='store', default='', nargs='?')
     corpus_subs.add_parser('unlink')\
             .set_defaults(func=parser.corpus_unlink)\
-            .add_db()\
             .add_argument('corpus_name', action='store')\
             .add_argument('source_name', action='store')
     corpus_subs.add_parser('sources')\
             .set_defaults(func=parser.corpus_sources)\
-            .add_db()\
             .add_argument('corpus_name', action='store')
     corpus_subs.add_parser('rm')\
             .set_defaults(func=parser.corpus_rm)\
-            .add_db()\
             .add_argument('corpus_name', action='store')
 
     # source commands
     source_subs.add_parser('ls')\
             .set_defaults(func=parser.source_ls)\
-            .add_db()
     source_subs.add_parser('rm')\
             .set_defaults(func=parser.source_rm)\
-            .add_db()\
             .add_argument('source_name', action='store')
     source_subs.add_parser('new')\
             .set_defaults(func=parser.source_new)\
-            .add_db()\
             .add_argument('source_name', action='store')\
             .add_argument('path', action='store')\
             .add_argument('source_description', action='store', default='', nargs='?')
@@ -339,26 +305,20 @@ def initialize_arg_parser():
     poem_subs.add_parser('new') \
              .set_defaults(func=parser.poem_new) \
              .add_argument('-c', '--corpus', dest='corpus_name', action='store')\
-             .add_argument('-r', '--tmpl_raw', action='store_true') \
              .add_argument('-o', '--output', action='store') \
-             .add_argument('-t', '--tmpl', action='store', default='haiku') \
-             .add_db()
+             .add_argument('-t', '--tmplname', action='store', default=None) \
 
     # template commands
     template_subs.add_parser('ls')\
-                 .set_defaults(func=parser.template_ls)\
-                 .add_db()
+                 .set_defaults(func=parser.template_ls)
     template_subs.add_parser('rm') \
                  .set_defaults(func=parser.template_rm) \
-                 .add_argument('tmplname', action='store')\
-                 .add_db()
+                 .add_argument('tmplname', action='store')
     template_subs.add_parser('new') \
                  .set_defaults(func=parser.template_new) \
-                 .add_argument('tmplname', action='store')\
-                 .add_db()
+                 .add_argument('tmplname', action='store')
     template_subs.add_parser('edit') \
                  .set_defaults(func=parser.template_edit) \
-                 .add_argument('tmplname', action='store')\
-                 .add_db()
+                 .add_argument('tmplname', action='store')
 
     return parser
