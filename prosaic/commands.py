@@ -36,8 +36,8 @@ class ProsaicArgParser(ArgumentParser):
 
     # Helpers and properties:
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, prog=None):
+        super().__init__(prog=prog)
         self.add_argument('--home', action='store', default=cfg.DEFAULT_PROSAIC_HOME)
 
     def get_corpus(self, session) -> Corpus:
@@ -216,7 +216,7 @@ class ProsaicArgParser(ArgumentParser):
                 print(line)
 
     def template_ls(self):
-        template_files = filter(lambda s: not s.startswith('.'), listdir(TEMPLATES))
+        template_files = filter(lambda s: not s.startswith('.'), listdir(self.template_path))
         # TODO this will be weird once we support non json templates:
         without_ext = map(lambda s: s.replace('.json', ''), template_files)
         for filename in without_ext:
@@ -241,7 +241,7 @@ class ProsaicArgParser(ArgumentParser):
         self.config = config
 
         if getattr(self.args, 'tmplname', None) is None:
-            self.args.tmplname = self.config.get('default_template', cfg.DEFAULT_TEMPLATE))
+            self.args.tmplname = self.config.get('default_template', cfg.DEFAULT_TEMPLATE)
 
         try:
             self.args.func()
@@ -269,7 +269,8 @@ def initialize_arg_parser():
     template_subs = template_parser.add_subparsers()
 
     # corpus commands
-    corpus_subs.add_parser('ls').set_defaults(func=parser.corpus_ls)
+    corpus_subs.add_parser('ls')\
+            .set_defaults(func=parser.corpus_ls)
     corpus_subs.add_parser('new')\
             .set_defaults(func=parser.corpus_new)\
             .add_argument('corpus_name', action='store')\
@@ -291,7 +292,7 @@ def initialize_arg_parser():
 
     # source commands
     source_subs.add_parser('ls')\
-            .set_defaults(func=parser.source_ls)\
+            .set_defaults(func=parser.source_ls)
     source_subs.add_parser('rm')\
             .set_defaults(func=parser.source_rm)\
             .add_argument('source_name', action='store')

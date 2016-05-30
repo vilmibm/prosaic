@@ -19,12 +19,13 @@ from os.path import join, exists, dirname, expanduser
 from shutil import copytree
 
 import prosaic.commands as cmd
-from prosaic.cfg import read_config
+import prosaic.models as m
+import prosaic.cfg as cfg
 
 def main():
     parser = cmd.initialize_arg_parser()
     args = parser.parse_args()
-    prosaic_home = parser.args.home
+    prosaic_home = args.home
     cfgpath = join(prosaic_home, 'prosaic.conf')
     tmplpath = join(prosaic_home, 'templates')
 
@@ -37,11 +38,14 @@ def main():
         copytree(template_source, tmplpath)
 
     if not exists(cfgpath):
-        with open(cfgpath) as f:
+        with open(cfgpath, 'w') as f:
             f.write(cfg.DEFAULT_CONFIG)
 
-    config = read_config(cfgpath)
+    config = cfg.read_config(cfgpath)
 
+    m.migrate(m.Database(**config['database']))
+
+    # TODO decouple argument parsing from command execution
     parser.dispatch(args, config)
 
 if __name__ == '__main__':

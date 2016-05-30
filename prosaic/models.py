@@ -42,14 +42,13 @@ class Database(dict):
     def __repr__(self):
         return self._fmt()
 
-@lru_cache(maxsize=8)
+@lru_cache(maxsize=128)
 def get_engine(db: Database) -> Engine:
     return create_engine('postgresql://{user}:{password}@{host}:{port}/{dbname}'\
            .format(**db))
 
 Session = sessionmaker()
 
-#@lru_cache(maxsize=8)
 def get_session(db: Database):
     Session.configure(bind=get_engine(db))
     return Session()
@@ -59,6 +58,9 @@ Base = declarative_base()
 corpora_sources = Table('corpora_sources', Base.metadata,
                        Column('corpus_id', INTEGER, ForeignKey('corpora.id')),
                        Column('source_id', INTEGER, ForeignKey('sources.id')))
+
+def migrate(db: Database):
+    Base.metadata.create_all(get_engine(db))
 
 class Source(Base):
     __tablename__ = "sources"

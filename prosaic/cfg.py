@@ -22,22 +22,22 @@ DEFAULT_DB = {'user': 'prosaic',
               'password': 'prosaic',
               'host': '127.0.0.1',
               'port': 5432,
-              'db': 'prosaic'}
+              'dbname': 'prosaic'}
 
-DEFAULT_CONFIG = """database: {
+DEFAULT_CONFIG = """database: {{
     user: {user}
     password: {password}
     host: {host}
     port: {port}
-    db: {db}
-}
+    dbname: {dbname}
+}}
 default_template: {default_tmpl}
-""".format(default_tmpl=DEFAULT_TEMPATE,
+""".format(default_tmpl=DEFAULT_TEMPLATE,
            user=DEFAULT_DB['user'],
            password=DEFAULT_DB['password'],
            port=DEFAULT_DB['port'],
            host=DEFAULT_DB['host'],
-           db=DEFAULT_DB['db'],)
+           dbname=DEFAULT_DB['dbname'],)
 
 def read_config(cfgpath):
     return ConfigFactory.parse_file(cfgpath)
