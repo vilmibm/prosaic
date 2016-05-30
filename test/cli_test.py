@@ -14,14 +14,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from collections import namedtuple
 from contextlib import redirect_stdout
+from copy import deepcopy
 import io
 from os import environ
 from os.path import join
 from shutil import rmtree
 import sys
+from unittest.mock import patch
 
 from pytest import yield_fixture
 
+from prosaic.cfg import DEFAULT_DB, DEFAULT_TEMPLATE
 import prosaic.models as m
 from prosaic.models import Corpus, Source
 from prosaic import main
@@ -30,19 +33,22 @@ environ['EDITOR'] = 'echo'
 TEST_PROSAIC_HOME = '/tmp/prosaic_test'
 # TODO pick shorter book lulz
 TEST_SOURCE_PATH = './pride.txt'
-DB = m.Database(user='prosaic', password='prosaic', dbname='prosaic_test')
-db_args = ['-d', 'prosaic_test', '--user', 'prosaic', '--password', 'prosaic']
+TEST_CONFIG = {'default_template': DEFAULT_TEMPLATE,
+               'database': deepcopy(DEFAULT_DB)}
+TEST_CONFIG['database']['dbname'] = 'prosaic_test'
+DB = m.Database(**TEST_CONFIG['database'])
 Result = namedtuple('Result', ['code', 'lines'])
 
 def prosaic(*args) -> Result:
     """Helper function for running prosaic.main, mimicking use from the command
     line. Sets argv to be ['prosaic'] + whatever is passed as args. Returns the
     exit code prosaic would have returned."""
-    sys.argv = ['prosaic'] + list(args) + db_args
+    sys.argv = ['prosaic'] + list(args) + ['--home', TEST_PROSAIC_HOME]
     buff = io.StringIO()
     code = None
-    with redirect_stdout(buff):
-        code = main()
+    with patch('prosaic.cfg.read_config', return_value=TEST_CONFIG):
+        with redirect_stdout(buff):
+            code = main()
     buff.seek(0)
     result = buff.read()
     lines = set(result.split('\n')[0:-1])

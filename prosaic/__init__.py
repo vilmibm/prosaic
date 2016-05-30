@@ -46,7 +46,7 @@ def main():
     m.migrate(m.Database(**config['database']))
 
     # TODO decouple argument parsing from command execution
-    parser.dispatch(args, config)
+    return parser.dispatch(args, config)
 
 if __name__ == '__main__':
     sys.exit(main())
