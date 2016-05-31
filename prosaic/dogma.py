@@ -51,13 +51,13 @@ class KeywordRule(Rule):
     __slots__ = ['keyword', 'phrase_cache', 'strength']
     max_strength = 11
 
-    def __init__(self, keyword, conn, corpus):
+    def __init__(self, keyword, conn, corpus_id):
         self.strength = self.max_strength
         self.keyword = nlp.stem_word(keyword)
-        self.prime_cache(conn, corpus)
+        self.prime_cache(conn, corpus_id)
 
-    def prime_cache(self, conn, corpus):
-        print('building phrase cache')
+    def prime_cache(self, conn, corpus_id):
+        log.debug('building phrase cache')
         sql = """
         select p.line_no, p.source_id
         from phrases p
@@ -68,7 +68,7 @@ class KeywordRule(Rule):
         """
         self.phrase_cache = conn.execute(sa.text(sql)\
                                          .params(keyword=self.keyword,
-                                                 corpus_id=corpus.id))\
+                                                 corpus_id=corpus_id))\
                             .fetchall()
         if is_empty(self.phrase_cache):
             self.strength = 0
@@ -97,7 +97,7 @@ class FuzzyKeywordRule(KeywordRule):
         ok_distance = 1 + self.max_strength - self.strength
         line_no, source_id = phrase
 
-        return "source_id = {} and abs({} - p.line_no) <= {}".format(
+        return "p.source_id = {} and abs({} - p.line_no) <= {}".format(
             source_id, line_no, ok_distance
         )
 
