@@ -13,10 +13,11 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import sys
+import logging
 from os import mkdir
 from os.path import join, exists, dirname, expanduser
 from shutil import copytree
+import sys
 
 import prosaic.commands as cmd
 import prosaic.models as m
@@ -29,15 +30,26 @@ def main():
     cfgpath = join(prosaic_home, 'prosaic.conf')
     tmplpath = join(prosaic_home, 'templates')
 
+    log = logging.getLogger('prosaic')
+    log.addHandler(logging.StreamHandler(stream=sys.stderr))
+
+    if args.verbose:
+        log.setLevel(logging.DEBUG)
+    else:
+        log.setLevel(logging.ERROR)
+
     if not exists(prosaic_home):
+        log.debug('Initializing prosaic home folder...')
         mkdir(prosaic_home)
 
     if not exists(tmplpath):
+        log.debug('Copying initial templates...')
         prosaic_install_path = dirname(sys.modules['prosaic'].__file__)
         template_source = join(prosaic_install_path, 'templates')
         copytree(template_source, tmplpath)
 
     if not exists(cfgpath):
+        log.debug('Initializing default config...')
         with open(cfgpath, 'w') as f:
             f.write(cfg.DEFAULT_CONFIG)
 

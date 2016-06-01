@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from functools import reduce
+import logging
 from random import choice
 import re
 
@@ -21,6 +22,8 @@ import sqlalchemy as sa
 import prosaic.nlp as nlp
 from prosaic.models import Phrase, Corpus, Source
 from prosaic.util import match, is_empty, update
+
+log = logging.getLogger('prosaic')
 
 class Rule:
     strength = 0

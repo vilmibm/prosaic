@@ -1,6 +1,24 @@
+#!/usr/bin/env python
+# This program is part of prosaic.
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import logging
 import re
 import prosaic.nlp as nlp
 from prosaic.models import Phrase, Source, Corpus, get_session, Database
+
+log = logging.getLogger('prosaic')
 
 pairs = [('{', '}'), ('(', ')'), ('[', ']')]
 bad_substrings = ['`', '“', '”', '«', '»', "''", '\\n', '\\',]
@@ -35,23 +53,23 @@ def process_text(db: Database, source: Source, raw_text: str) -> None:
     """Given raw text and a source filename, adds a new source with the raw
     text as its content and then processes all of the phrases in the text."""
 
-    print('connecting to db...')
+    log.debug('connecting to db...')
     session = get_session(db)
 
-    print('pre-processing text...')
+    log.debug('pre-processing text...')
     text = pre_process_text(raw_text)
 
-    print('adding source to corpus...')
+    log.debug('adding source to corpus...')
     source.content = text
     session.add(source)
 
-    print('extracting sentences')
+    log.debug('extracting sentences')
     sentences = nlp.sentences(text)
 
-    print("expanding clauses...")
+    log.debug("expanding clauses...")
     sentences = nlp.expand_multiclauses(sentences)
 
-    print("pre-processing, parsing and saving sentences...")
+    log.debug("pre-processing, parsing and saving sentences...")
     for x in range(0, len(sentences)):
         sentence = pre_process_sentence(sentences[x])
 
@@ -69,4 +87,4 @@ def process_text(db: Database, source: Source, raw_text: str) -> None:
 
     session.commit()
 
-    print("done")
+    log.debug("done")

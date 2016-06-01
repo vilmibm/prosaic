@@ -14,10 +14,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from argparse import ArgumentParser
 from json import loads
+import logging
 from os import environ, listdir, remove
 from os.path import join, exists
 from shutil import copyfile
 from subprocess import call
+import sys
 
 from sqlalchemy import text
 
@@ -26,6 +28,8 @@ from prosaic.parsing import process_text
 from prosaic.generation import poem_from_template
 import prosaic.cfg as cfg
 from prosaic.util import slurp, first
+
+log = logging.getLogger('prosaic')
 
 # TODO add aliases (as specified in cli.md)
 class ProsaicArgParser(ArgumentParser):
@@ -39,6 +43,7 @@ class ProsaicArgParser(ArgumentParser):
     def __init__(self, prog=None):
         super().__init__(prog=prog)
         self.add_argument('--home', action='store', default=cfg.DEFAULT_PROSAIC_HOME)
+        self.add_argument('-v', '--verbose', action='store_true')
 
     def get_corpus(self, session) -> Corpus:
         corpus = session.query(Corpus)\
@@ -154,8 +159,8 @@ class ProsaicArgParser(ArgumentParser):
         session = get_session(self.db)
         corpus = self.get_corpus(session)
         if 0 == len(corpus.sources):
-            print("Corpus {} has no sources.".format(corpus.name))
-            print("Use `prosaic corpus link 'corpus name' 'source name'` to add sources")
+            log.error("Corpus {} has no sources.".format(corpus.name))
+            log.error("Use `prosaic corpus link 'corpus name' 'source name'` to add sources")
         for source in corpus.sources:
             print(source.name)
 
@@ -201,8 +206,8 @@ class ProsaicArgParser(ArgumentParser):
         session = get_session(self.db)
         corpus = self.get_corpus(session)
         if 0 == len(corpus.sources):
-            print("Corpus {} has no sources.".format(corpus.name))
-            print("Use `prosaic corpus link 'corpus name' 'source name'` to add sources")
+            log.error("Corpus {} has no sources.".format(corpus.name))
+            log.error("Use `prosaic corpus link 'corpus name' 'source name'` to add sources")
             return
         template = self.template
         poem_lines = map(first, poem_from_template(self.template, self.db, corpus.id))
@@ -210,7 +215,7 @@ class ProsaicArgParser(ArgumentParser):
         if output_filename:
             with open(output_filename, 'w') as f:
                 f.write(list(poem_lines).join('\n') + '\n')
-                print('poem written to {}'.format(output_filename))
+                log.debug('poem written to {}'.format(output_filename))
         else:
             for line in poem_lines:
                 print(line)
@@ -246,7 +251,7 @@ class ProsaicArgParser(ArgumentParser):
         try:
             self.args.func()
         except AttributeError as e:
-            print('prosaic experienced a fatal error: {}'.format(e))
+            log.error('prosaic experienced a fatal error: {}'.format(e))
             self.print_help()
             return 1
 
