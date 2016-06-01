@@ -153,6 +153,8 @@ def rhyme_sound(sentence):
 consonant_re = re.compile("(SH|CH|TH|B|D|G|L|N|P|S|T|V|Y|F|K|M|NG|R|W|Z)")
 
 def has_alliteration(sentence):
+    # TODO this is mostly working but a little looser than I'd like. consider a
+    # set of alliterative phoneme pairs.
     ws = words(sentence)
 
     def first_consonant_sound(word):
