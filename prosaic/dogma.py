@@ -152,14 +152,7 @@ class AlliterationRule(Rule):
 
         return "p.alliteration = true"
 
-class BlankRule(Rule):
-    __slots__ = ['strength', 'db']
-    def __init__(self, db):
-        self.strength = 0
-        self.db = db
-
-    def to_query(self):
-        raise NotImplementedError()
+class BlankRule(Rule): pass
 
 class RuleSet:
     def __init__(self, rules):
