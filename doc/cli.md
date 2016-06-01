@@ -19,8 +19,6 @@ All subcommands are passed to the `prosaic` command:
 
 ## corpus
 
-_aliases_: c, corpora
-
 * ls
 * rm
 * new
@@ -66,8 +64,6 @@ Lists all of the sources in a corpus.
 
 ## source
 
-_aliases_: s, sources
-
 * ls
 * rm
 * new
@@ -96,8 +92,6 @@ is linked to a corpora.
 
 ## poem
 
-_aliases: p
-
 * new
 
 ### new
@@ -111,8 +105,6 @@ _aliases: p
 Generate a new poem.
 
 ## template
-
-_aliases_: t, tmpl
 
 * ls
 * rm

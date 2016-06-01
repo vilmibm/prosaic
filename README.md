@@ -24,63 +24,84 @@ a poem line by line.
 
 ## prerequisites
 
-* mongodb 2.0+ (see explanation at bottom)
-* python 3.4+
-* linux (it has also been verified to work fine on osx)
-* you might need some -dev libraries to get nltk to compile
+* postgresql 9.0+
+* python 3.5+
+* linux (it probably works on a mac, i donno)
+* you might need some -dev libraries and/or gcc to get nltk to compile
 
 ## quick start
 
     $ sudo pip install prosaic
-    $ prosaic corpus loadfile pride_and_prejudice.txt
+    $ prosaic source new pride_and_prejudice pandp.txt
+    $ prosaic source new hackers hackers_screenplay.txt
+    $ prosaic corpus new pride_and_hackers
+    $ prosaic corpus link pride_and_hackers pride_and_prejudice
+    $ prosaic corpus link pride_and_hackers hackers
     $ prosaic poem new
 
-      -- and so I warn you.
-      We_will_ know where we have gone
-      Mr. Darcy smiled
+      and so I warn you.
+      We will know where we have gone
+      ALL: HACK THE PLANET
 
 ## slow start
 
-    # install mongodb / python3 / virtualenv for your platform
-    $ virtualenv poetry
+    # install postgresql / python 3.5 / virtualenv for your platform
+    # set up a database called prosaic owned by role prosaic with password prosaic
+    $ python3 -mvenv poetry
     $ source poetry/bin/activate
     $ pip install prosaic
     # wait a bit, nltk compiles some stuff
     # find some text, maybe from project gutenberg
-    $ prosaic corpus loadfile pride_and_prejudice.txt
-    $ prosaic corpus loadfile call_of_cthulhu.txt
+    $ prosaic source new pride_and_prejudice pandp.txt
+    $ prosaic source new hackers hackers_screenplay.txt
+    $ prosaic corpus new pride_and_hackers
+    $ prosaic corpus link pride_and_hackers pride_and_prejudice
+    $ prosaic corpus link pride_and_hackers hackers
     $ prosaic poem new -t sonnet
 
       Her colour changed, and she said no more.
       They saw much to interest, but nothing to justify inquiry.
       sir, I do indeed.
       Elizabeth could not but look surprised.
-     `` I am talking of possibilities, Charles.''
-     `` Can it be possible that he will marry her?''
-     `` I am talking of possibilities, Charles.''
+
+      I am talking of possibilities, Charles.
+      Can it be possible that he will marry her?''
+      I am talking of possibilities, Charles.''
       He looked surprised, displeased, alarmed
-     `` You can not be too much upon your guard.
+
+      You can not be too much upon your guard.
       One Survivor and Dead Man Found Aboard.
       It had not been very great
-     :-- but let me not interrupt you, sir.
-      Mrs. Bennet said only,`` Nonsense, nonsense!''
+      but let me not interrupt you, sir.
+
+      Mrs. Bennet said only, Nonsense, nonsense!
       She could not bear such suspense
 
 ## use as a library
 
 ```python
-from prosaic.models import db_engine
+from prosaic.cfg import DEFAULT_DB
+from prosaic.models import Database, Source, Corpus, get_session
 from prosaic.parsing import process_text
 from prosaic.generate import poem_from_template
 
-db = db_engine('dbuser', 'dbpass', 'localhost', 5432)
-process_text("some very long string of text", "a name for this long string of text", db)
+db = Database(**DEFAULT_DB)
+process_text(db, Source(name='some_name'), 'some very long string of text')
+
+session = get_session(db)
+source = session.query(Source).filter(Source.name == 'some_name').one()
+corpus = Corpus(name='sweet corpus', sources=[source])
+session.add(corpus)
+session.commit()
 
 # poem_from_template returns raw line dictionaries from the database:
-poem_lines = poem_from_template([{'syllables': 5}, {'syllables':7}, {'syllables':5}], db)
+poem_lines = poem_from_template([{'syllables': 5}, {'syllables':7}, {'syllables':5}], 
+                                db,
+                                corpus.id)
 
 # pull raw text out of each line dictionary and print it:
-print(list(map(lambda l: l['raw'], poem_lines)))
+for line in poem_lines:
+  print(line[0])
 ```
 
 ## write a template
@@ -115,21 +136,14 @@ The rules available are:
 
 ## full CLI reference
 
-* `prosaic corpus ls`: list all the databases in your mongo server
-* `prosaic corpus rm <database name>`: delete (drop) a corpus
-* `prosaic corpus loadfile <filename> -d <dbname>`: add a new file of text to the corpus db specified with `-d`. dbname defaults to `prosaic`
-* `prosaic poem new -t <template name> -d <dbname>`: generate a poem using the template specified by `-t` and the corpus db specified by `-d`
-* `prosaic template ls`: list the templates prosaic knows about
-* `prosaic template rm <template name>`: delete a template
-* `prosaic template edit <template name>`: edit existing template using `$EDITOR`
-* `prosaic template new <template name>`: write new template using `$EDITOR`
+Check out [the CLI reference documentation](./doc/cli.md).
             
 ## how does prosaic work?
 
 prosaic is two parts: a text parser and a poem writer. a human selects
 text files to feed to prosaic, who will chunk the text up into phrases
-and tag them with metadata. these phrases all go into a corpus (stored
-as a mongodb collection).
+and tag them with metadata. the human then links each of these parsed text
+files to a corpus.
 
 once a corpus is prepared, a human then writes (or reuses) a poem
 template (in json) that describes a desired poetic structure (number
@@ -160,6 +174,17 @@ py.test
 
 ## changelog
 
+ * 4.0.0
+
+  * Port to postgresql + sqlalchemy
+  * Completely rewrite command line interface
+  * Add a --verbose flag and muzzle the logging that used to happen
+    unless it's present
+  * Support a configuration file (~/.prosaic/prosaic.conf) for
+    specifying database connections and default template
+  * Rename some modules
+  * Remove some vestigial features
+
  * 3.5.4 - update nltk dependence so prosaic works on python 3.5
  * 3.5.3 - mysterious release i don't know
  * 3.5.2 - handle weird double escaping issues
@@ -173,19 +198,12 @@ py.test
  * 2.0.0 - shiny new CLI UI. run `hy __init__.hy -h` to see/explore the subcommands.
  * 1.0.0 - it works
 
-## why mongodb?
-
-MongoDB is almost always the wrong answer to a given architectural
-question, but it is particularly well suited for prosaic's needs: no
-relational data (and none likely to crop up), no concerns about
-HA/consistency, and a well defined document structure.
-
 ## further reading
 
 * [Prosaic: A New Approach to Computer Poetry](http://www.amcircus.com/arts/prosaic-a-new-approach-to-computer-poetry.html) by Nathaniel Smith. American Circus, 2013
-* [Make poetry from your twitter account!](https://gist.github.com/LynnCo/8447965d98f8b434808e) by [@lynncyrin ](https://twitter.com/lynncyrin)
 * [The Cyberpunk Prophecies](http://cyberpunkprophecies.tumblr.com). Cut-up poetry collection made with prosaic using 31 cyberpunk novels.
-* [chiptheglasses](http://chiptheglasses.com/tag/poem.html), poetry by Nathaniel Smith, including many prosaic works.
+* [graveyard theory](http://graveyardtheory.net/tag/poem.html), poetry by Nathaniel Smith, including many prosaic works.
+* [Make poetry from your twitter account!](https://gist.github.com/LynnCo/8447965d98f8b434808e) by [@lynncyrin ](https://twitter.com/lynncyrin)
 * [Dada Manifesto On Feeble Love And Bitter Love](http://www.391.org/manifestos/1920-dada-manifesto-feeble-love-bitter-love-tristan-tzara.html) by Tristan Tzara, 1920.
 * [Prosaic on Gnoetry Daily](https://gnoetrydaily.wordpress.com/tag/prosaic/). Blog of computer poetry featuring some prosaic-generated works.
 * [Lovecraft plaintext corpus](https://github.com/nathanielksmith/lovecraftcorpus). Most of H.P. Lovecraft's bibliography in plain text for cutting up.
