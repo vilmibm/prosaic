@@ -52,7 +52,7 @@ def extract_rule(conn, corpus_id, letter_sound_map, raw_pair):
     rule = None
 
     if rule_key == 'rhyme': rule = dogma.RhymeRule(letter_sound_map.get(value))
-    elif rule_key == 'blank': rule = dogma.BlankRule(conn)
+    elif rule_key == 'blank': rule = dogma.BlankRule()
     elif rule_key == 'alliteration': rule = dogma.AlliterationRule(value)
     elif rule_key == 'keyword': rule = dogma.KeywordRule(value, conn, corpus_id)
     elif rule_key == 'fuzzy': rule = dogma.FuzzyKeywordRule(value, conn, corpus_id)
