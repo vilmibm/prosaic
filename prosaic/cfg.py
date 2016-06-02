@@ -12,15 +12,32 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from os import environ
-from os.path import expanduser, join
+from os.path import expanduser
 
-MONGO_HOST = environ.get('PROSAIC_DBHOST', 'localhost')
-MONGO_PORT = int(environ.get('PROSAIC_DBPORT', 27017))
-DEFAULT_DB = environ.get('PROSAIC_DBNAME', 'prosaic')
-PROSAIC_HOME = environ.get('PROSAIC_HOME', join(expanduser('~'), '.prosaic'))
+from pyhocon import ConfigFactory
+
+DEFAULT_PROSAIC_HOME = expanduser('~/.prosaic')
 DEFAULT_TEMPLATE = 'haiku'
-# TODO support for hocon (.conf)
-DEFAULT_TEMPLATE_EXT = 'json'
-TEMPLATES = join(PROSAIC_HOME, 'templates')
-EXAMPLE_TEMPLATE = join(TEMPLATES, '.example.template')
+DEFAULT_DB = {'user': 'prosaic',
+              'password': 'prosaic',
+              'host': '127.0.0.1',
+              'port': 5432,
+              'dbname': 'prosaic'}
+
+DEFAULT_CONFIG = """database: {{
+    user: {user}
+    password: {password}
+    host: {host}
+    port: {port}
+    dbname: {dbname}
+}}
+default_template: {default_tmpl}
+""".format(default_tmpl=DEFAULT_TEMPLATE,
+           user=DEFAULT_DB['user'],
+           password=DEFAULT_DB['password'],
+           port=DEFAULT_DB['port'],
+           host=DEFAULT_DB['host'],
+           dbname=DEFAULT_DB['dbname'],)
+
+def read_config(cfgpath):
+    return ConfigFactory.parse_file(cfgpath)
