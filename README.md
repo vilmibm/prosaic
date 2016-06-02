@@ -19,8 +19,7 @@ and licensed under the [GPL](https://www.gnu.org/copyleft/gpl.html).
 
 prosaic is a tool for
 [cutting up](https://en.wikipedia.org/wiki/Cut-up_technique) large quantities of
-text that a poet can then derive poetry from by writing templates that describe
-a poem line by line.
+text and rearranging it to form poetic works.
 
 ## prerequisites
 
@@ -37,7 +36,7 @@ a poem line by line.
     $ prosaic corpus new pride_and_hackers
     $ prosaic corpus link pride_and_hackers pride_and_prejudice
     $ prosaic corpus link pride_and_hackers hackers
-    $ prosaic poem new
+    $ prosaic poem new -thaiku
 
       and so I warn you.
       We will know where we have gone
