@@ -93,7 +93,7 @@ Now we have a corpus called `pride_and_cthulhu` and it has two sources. We can
 make sure this worked with:
 
 ```bash
-prosaic corpus sources gfq
+prosaic corpus sources pride_and_cthulhu
 
 pride_and_prejudice
 call_of_cthulhu
@@ -144,4 +144,19 @@ Oh!
 Congratulations; you, jane austen, cthulhu, and your computer just wrote a poem
 together.
 
+### configuration file
 
+You can change the database connection details in `~/.prosaic/prosaic.conf`. The default config looks like this:
+
+```hocon
+database: {
+    user: prosaic
+    password: prosaic
+    host: 127.0.0.1
+    port: 5432
+    dbname: prosaic
+}
+default_template: haiku
+```
+
+Update as needed with your postgresql details. you can also change what template is used when `prosaic poem new` is run without the `-t` argument.
