@@ -43,41 +43,12 @@ a poem line by line.
       We will know where we have gone
       ALL: HACK THE PLANET
 
-## slow start
-
-    # install postgresql / python 3.5 / virtualenv for your platform
-    # set up a database called prosaic owned by role prosaic with password prosaic
-    $ python3 -mvenv poetry
-    $ source poetry/bin/activate
-    $ pip install prosaic
-    # wait a bit, nltk compiles some stuff
-    # find some text, maybe from project gutenberg
-    $ prosaic source new pride_and_prejudice pandp.txt
-    $ prosaic source new hackers hackers_screenplay.txt
-    $ prosaic corpus new pride_and_hackers
-    $ prosaic corpus link pride_and_hackers pride_and_prejudice
-    $ prosaic corpus link pride_and_hackers hackers
-    $ prosaic poem new -t sonnet
-
-      Her colour changed, and she said no more.
-      They saw much to interest, but nothing to justify inquiry.
-      sir, I do indeed.
-      Elizabeth could not but look surprised.
-
-      I am talking of possibilities, Charles.
-      Can it be possible that he will marry her?''
-      I am talking of possibilities, Charles.''
-      He looked surprised, displeased, alarmed
-
-      You can not be too much upon your guard.
-      One Survivor and Dead Man Found Aboard.
-      It had not been very great
-      but let me not interrupt you, sir.
-
-      Mrs. Bennet said only, Nonsense, nonsense!
-      She could not bear such suspense
+See the [full tutorial](doc/tutorial.md) for more detailed instruction. There
+is also a [cli reference](doc/cli.md).
 
 ## use as a library
+
+This is a little complex right now; I'm working on a simplier API.
 
 ```python
 from prosaic.cfg import DEFAULT_DB
@@ -104,15 +75,24 @@ for line in poem_lines:
   print(line[0])
 ```
 
+## use on the web
+
+there is an *extremely alpha* web wrapper (currently being re-written) at
+[prosaic.party](https://prosaic.party).
+
 ## write a template
 
 Templates are currently stored as json files (or passed from within code as
 python dictionaries) that represent an array of json objects, each one
 containing describing a line of poetry.
 
-A template describes a "desired" poem. Prosaic uses the template to approximate a piece given what text it has in its database. Running prosaic repeatedly with the same template will almost always yield different results.
+A template describes a "desired" poem. Prosaic uses the template to approximate
+a piece given what text it has in its database. Running prosaic repeatedly with
+the same template will almost always yield different results.
 
-You can see available templates with `prosaic template ls`, edit them with `prosaic template edit <template name>`, and add your own with `prosaic template new <template name>`.
+You can see available templates with `prosaic template ls`, edit them with
+`prosaic template edit <template name>`, and add your own with `prosaic
+template new <template name>`.
 
 The rules available are:
 
@@ -168,6 +148,7 @@ Patches are more than welcome if they come with tests. Tests should always be
 green in master; if not, please let me know! To run the tests:
 
 ```bash
+# assuming you have pip install'd prosaic from source into an activated venv:
 cd test
 py.test
 ```
