@@ -56,10 +56,12 @@ from prosaic.parsing import process_text
 from prosaic.generate import poem_from_template
 
 db = Database(**DEFAULT_DB)
-process_text(db, Source(name='some_name'), 'some very long string of text')
-
 session = get_session(db)
-source = session.query(Source).filter(Source.name == 'some_name').one()
+
+source = Source(name='some_name')
+session.add(source)
+process_text(source, 'some very long string of text')
+
 corpus = Corpus(name='sweet corpus', sources=[source])
 session.add(corpus)
 session.commit()

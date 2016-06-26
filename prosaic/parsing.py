@@ -16,7 +16,7 @@
 import logging
 import re
 import prosaic.nlp as nlp
-from prosaic.models import Phrase, Source, Corpus, get_session, Database
+from prosaic.models import Phrase, Source, Corpus, Session
 
 log = logging.getLogger('prosaic')
 
@@ -48,13 +48,12 @@ def pre_process_sentence(sentence: str) -> str:
 
     return sentence.rstrip().lstrip()
 
-# TODO support source descriptions
-def process_text(db: Database, source: Source, raw_text: str) -> None:
+def process_text(source: Source, raw_text: str) -> None:
     """Given raw text and a source filename, adds a new source with the raw
     text as its content and then processes all of the phrases in the text."""
 
     log.debug('connecting to db...')
-    session = get_session(db)
+    session = Session.object_session(source)
 
     log.debug('pre-processing text...')
     text = pre_process_text(raw_text)
@@ -78,13 +77,10 @@ def process_text(db: Database, source: Source, raw_text: str) -> None:
         syllables = nlp.count_syllables(sentence)
         alliteration = nlp.has_alliteration(sentence)
 
-        phrase = Phrase(stems=stems, raw=sentence, alliteration=alliteration, 
+        phrase = Phrase(stems=stems, raw=sentence, alliteration=alliteration,
                         rhyme_sound=rhyme_sound,
                         syllables=syllables, line_no=x, source=source)
-        # TODO save the thread on a coroutine or something
 
         session.add(phrase)
 
-    session.commit()
-
-    log.debug("done")
+    log.debug("done processing text; changes not yet committed")

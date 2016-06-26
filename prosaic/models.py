@@ -19,8 +19,6 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.dialects.postgresql import ARRAY, TEXT, INTEGER
 from sqlalchemy.ext.declarative import declarative_base
 
-# TODO rebuild venv outside of prosaic src
-
 class Database(dict):
     def __init__(self, user='prosaic', password='prosaic', host='localhost',
                  port=5432, dbname='prosaic'):

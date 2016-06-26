@@ -199,8 +199,12 @@ class ProsaicArgParser(ArgumentParser):
         name = self.args.source_name
         description = self.args.source_description
         source = Source(name=name, description=description)
+        session = get_session(self.db)
+        session.add(source)
 
-        process_text(self.db, source, text)
+        process_text(source, text)
+
+        session.commit()
 
     def poem_new(self):
         session = get_session(self.db)
