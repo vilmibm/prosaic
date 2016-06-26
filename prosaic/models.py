@@ -69,6 +69,9 @@ class Source(Base):
     description = Column(TEXT)
     content = Column(TEXT)
 
+    def __repr__(self) -> str:
+        return "Source<name='{}'>".format(self.name)
+
 class Phrase(Base):
     __tablename__ = "phrases"
 
@@ -90,7 +93,7 @@ class Phrase(Base):
     #tagged = Column(ARRAY(TEXT, dimensions=2))
 
     def __repr__(self) -> str:
-        return "Phrase(raw='%s', source='%s')" % (self.raw, self.source.name)
+        return "Phrase<source='{}', raw='{}'>".format(self.raw, self.source.name)
 
 Source.phrases = relationship('Phrase', back_populates='source')
 
@@ -103,3 +106,6 @@ class Corpus(Base):
     description = Column(TEXT)
 
     sources = relationship('Source', secondary=corpora_sources)
+
+    def __repr__(self):
+        return "Corpus<name='{}'>".format(self.name)
