@@ -122,7 +122,6 @@ class ProsaicArgParser(ArgumentParser):
         delete from corpora_sources
         where corpus_id = :corpus_id
         """
-        # TODO there is a bug here until corpusname is unique
         delete_sql = """
         delete from corpora
         where name = :corpus_name
@@ -177,7 +176,7 @@ class ProsaicArgParser(ArgumentParser):
         delete from corpora_sources
         where source_id = :source_id
         """
-        # TODO bug until source name is unique
+
         source_delete_sql = """
         delete from sources
         where name = :source_name

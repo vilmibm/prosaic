@@ -168,7 +168,7 @@ class TestSourceCommands:
     def test_ls(self, db, cleanup):
         source_names = ['blarf', 'flarf', 'narf']
         for name in source_names:
-            db.add(Source(name=name))
+            db.add(Source(name=name, content=''))
         db.commit()
         code, lines = prosaic('source', 'ls')
         assert 0 == code
@@ -177,7 +177,7 @@ class TestSourceCommands:
     def test_rm(self, db, cleanup):
         source_names = ['blarf', 'flarf', 'narf']
         for name in source_names:
-            db.add(Source(name=name))
+            db.add(Source(name=name, content=''))
         db.commit()
         assert 3 == db.query(Source).count()
         code, _ = prosaic('source', 'rm', 'flarf')

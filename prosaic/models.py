@@ -64,10 +64,9 @@ class Source(Base):
     __tablename__ = "sources"
 
     id = Column(INTEGER, primary_key=True)
-    # TODO Needs to be unique and not nil
-    name = Column(TEXT)
+    name = Column(TEXT, unique=True, nullable=False)
     description = Column(TEXT)
-    content = Column(TEXT)
+    content = Column(TEXT, nullable=False)
 
     def __repr__(self) -> str:
         return "Source<name='{}'>".format(self.name)
@@ -101,8 +100,7 @@ class Corpus(Base):
     __tablename__ = "corpora"
 
     id = Column(INTEGER, primary_key=True)
-    # TODO Needs to be unique and not nil
-    name = Column(TEXT)
+    name = Column(TEXT, nullable=False, unique=True)
     description = Column(TEXT)
 
     sources = relationship('Source', secondary=corpora_sources)
