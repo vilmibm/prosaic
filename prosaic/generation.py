@@ -28,10 +28,10 @@ from prosaic.util import pluck, is_empty, threaded, first, second
 
 def unique_sounds(conn: Connection, corpus_id: int) -> [str]:
     sql = """
-        select distinct rhyme_sound 
-        from phrases p 
-        join corpora_sources cs 
-        on p.source_id = cs.source_id 
+        select distinct rhyme_sound
+        from phrases p
+        join corpora_sources cs
+        on p.source_id = cs.source_id
         where corpus_id = :corpus_id
     """
     result = conn.execute(sa.text(sql).params(corpus_id=corpus_id)).fetchall()
@@ -88,4 +88,5 @@ def poem_from_template(template, db: Database, corpus_id, sound_cache=None):
                                  partial(ruleset_to_line, conn, corpus_id))
     poem_lines = executor.map(process_tmpl_line, template)
     executor.shutdown()
+
     return list(poem_lines)
