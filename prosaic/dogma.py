@@ -164,7 +164,7 @@ class RuleSet:
 
     def to_query(self, sess):
         base_sql = """
-            select p.raw
+            select p.raw, p.source_id
             from phrases p
             join corpora_sources cs
             on p.source_id = cs.source_id
