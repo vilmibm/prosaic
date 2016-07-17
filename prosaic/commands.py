@@ -192,18 +192,17 @@ class ProsaicArgParser(ArgumentParser):
         conn.execute(text(source_delete_sql).params(source_name=name))
 
     def source_new(self):
-        # TODO slurpin's bad; would be better to fully pipeline parsing from
-        # file -> processing -> db, with threading.
-        text = slurp(self.args.path)
+        text_file = open(self.args.path, 'r')
         name = self.args.source_name
         description = self.args.source_description
         source = Source(name=name, description=description)
         session = get_session(self.db)
         session.add(source)
 
-        process_text(source, text)
+        # TODO pass DB config object
+        process_text(source, text_file)
+        text_file.close()
 
-        session.commit()
 
     def poem_new(self):
         session = get_session(self.db)
