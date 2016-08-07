@@ -19,20 +19,24 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.dialects.postgresql import ARRAY, TEXT, INTEGER
 from sqlalchemy.ext.declarative import declarative_base
 
+
 class Database(dict):
     def __init__(self, user='prosaic', password='prosaic', host='localhost',
                  port=5432, dbname='prosaic'):
-        self._data = dict(user=user, password=password, port=port,
-                          host=host, dbname=dbname)
+        self['user'] = user
+        self['password'] = password
+        self['host'] = host
+        self['port'] = port
+        self['dbname'] = dbname
 
-    def __getattr__(self, k):
-        return self[k]
-
-    def __getitem__(self, k):
-        return self._data[k]
+        self.user = user
+        self.password = password
+        self.host = host
+        self.port = port
+        self.dbname = dbname
 
     def _fmt(self):
-        return ';'.join(sorted(map(str, self._data.values())))
+        return ';'.join(sorted(map(str, self.values())))
 
     def __hash__(self):
         return hash(self._fmt())

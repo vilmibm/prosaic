@@ -24,7 +24,7 @@ import sys
 from sqlalchemy import text
 
 from prosaic.models import Source, Corpus, get_session, get_engine, Database
-from prosaic.parsing import process_text
+from prosaic.parsing import process_text_stream
 from prosaic.generation import poem_from_template
 import prosaic.cfg as cfg
 from prosaic.util import slurp, first
@@ -192,18 +192,20 @@ class ProsaicArgParser(ArgumentParser):
         conn.execute(text(source_delete_sql).params(source_name=name))
 
     def source_new(self):
-        # TODO slurpin's bad; would be better to fully pipeline parsing from
-        # file -> processing -> db, with threading.
-        text = slurp(self.args.path)
+        text_file = open(self.args.path, 'r')
         name = self.args.source_name
         description = self.args.source_description
         source = Source(name=name, description=description)
-        session = get_session(self.db)
-        session.add(source)
 
-        process_text(source, text)
+        error = process_text_stream(self.db, source, text_file)
+        if error is not None:
+            print('There was an error extracting phrases:')
+            print('********')
+            print(error)
+            print('********')
+            print("The source '{}' was not saved.".format(name))
 
-        session.commit()
+        text_file.close()
 
     def poem_new(self):
         session = get_session(self.db)

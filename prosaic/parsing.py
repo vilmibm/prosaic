@@ -13,74 +13,134 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from multiprocessing import Process, Queue
+from io import TextIOBase
 import logging
 import re
+from typing import Optional
+
 import prosaic.nlp as nlp
-from prosaic.models import Phrase, Source, Corpus, Session
+from prosaic.models import Phrase, Source, Database, get_session # TODO
+
+# this is a sigil we use to signal that we're done processing a text file.
+DONE_READING = 666
+
+CHUNK_SIZE = 10000
+
+BAD_CHARS = {'(': True,
+             ')': True,
+             '{': True,
+             '}': True,
+             '[': True,
+             ']': True,
+             '`': True,
+             "'": True,
+             '"': True,
+             '\n': True,
+             '“': True,
+             '”': True,
+             '«': True,
+             '»': True,
+             "'": True,
+             '\\': True,
+             '_': True,}
+CLAUSE_MARKERS = {',':True, ';':True, ':':True}
+SENTENCE_MARKERS = {'?':True, '.':True, '!':True}
+# TODO random, magic number
+LONG_ENOUGH = 20
 
 log = logging.getLogger('prosaic')
 
-pairs = [('{', '}'), ('(', ')'), ('[', ']')]
-bad_substrings = ['`', '“', '”', '«', '»', "''", '\\n', '\\',]
-collapse_whitespace_re = re.compile("\s+")
+def line_handler(db: Database,
+                 line_queue: Queue,
+                 error_queue: Queue,
+                 source_id: int) -> None:
 
-def pre_process_text(raw_text: str) -> str:
-    """Performs text-wide regex'ing we need before converting to sentences."""
-    raw_text = re.sub(collapse_whitespace_re, ' ', raw_text)
-    return raw_text
+    session = get_session(db)
+    source = session.query(Source).filter(Source.id == source_id).one()
 
-def pre_process_sentence(sentence: str) -> str:
-    """Strip dangling pair characters. For now, strips some substrings that we
-    don't want. r and lstrip. Returns modified sentence"""
-    if sentence.count('"') == 1:
-        sentence = sentence.replace('"', '')
+    while True:
+        try:
+            line_pair = line_queue.get()
+            if line_pair == DONE_READING:
+                break
 
-    # TODO bootleg
-    for l,r in pairs:
-        if sentence.count(l) == 1 and sentence.count(r) == 0:
-            sentence = sentence.replace(l, '')
-        if sentence.count(r) == 1 and sentence.count(l) == 0:
-            sentence = sentence.replace(r, '')
+            line_no, line = line_pair
+            stems = nlp.stem_sentence(line)
+            rhyme_sound = nlp.rhyme_sound(line)
+            syllables = nlp.count_syllables(line)
+            alliteration = nlp.has_alliteration(line)
 
-    # TODO collapse this into a regex and do it in pre_process_text
-    for substring in bad_substrings:
-       sentence = sentence.replace(substring, '')
+            phrase = Phrase(stems=stems, raw=line, alliteration=alliteration,
+                            rhyme_sound=rhyme_sound,
+                            syllables=syllables, line_no=line_no, source=source)
 
-    return sentence.rstrip().lstrip()
+            session.add(phrase)
+        except Exception as e:
+            error_queue.put(e)
+            log.error('Died while processing text, rolling back')
+            session.rollback()
+            session.close()
+            return
 
-def process_text(source: Source, raw_text: str) -> None:
-    """Given raw text and a source filename, adds a new source with the raw
-    text as its content and then processes all of the phrases in the text."""
+    session.commit()
 
-    log.debug('connecting to db...')
-    session = Session.object_session(source)
 
-    log.debug('pre-processing text...')
-    text = pre_process_text(raw_text)
-
-    log.debug('adding source to corpus...')
-    source.content = text
+def process_text_stream(db: Database,
+                        source: Source,
+                        text: TextIOBase) -> Optional[Exception]:
+    session = get_session(db)
+    line_no = 1 # lol
+    ultimate_text = ''
+    futures = []
+    source.content = ''
     session.add(source)
+    session.commit() # so we can attach phrases to it. need its id.
+    line_queue = Queue()
+    error_queue = Queue()
+    db_proc = Process(target=line_handler,
+                      args=(db, line_queue, error_queue, source.id))
+    db_proc.start()
 
-    log.debug('extracting sentences')
-    sentences = nlp.sentences(text)
+    chunk = text.read(CHUNK_SIZE)
+    while len(chunk) > 0:
+        line_buff = ""
+        for c in chunk:
+            if BAD_CHARS.get(c, False):
+                if not line_buff.endswith(" "):
+                    line_buff += ' '
+                continue
+            if CLAUSE_MARKERS.get(c, False):
+                if len(line_buff) > LONG_ENOUGH:
+                    ultimate_text += line_buff
+                    line_queue.put((line_no, line_buff))
+                    line_no += 1
+                    line_buff = ""
+                else:
+                    line_buff += c
+                continue
+            if SENTENCE_MARKERS.get(c, False):
+                if len(line_buff) > LONG_ENOUGH:
+                    ultimate_text += line_buff
+                    line_queue.put((line_no, line_buff))
+                    line_no += 1
+                line_buff = ""
+                continue
+            line_buff += c
+        chunk = text.read(CHUNK_SIZE)
 
-    log.debug("expanding clauses...")
-    sentences = nlp.expand_multiclauses(sentences)
+    line_queue.put(DONE_READING)
+    db_proc.join()
 
-    log.debug("pre-processing, parsing and saving sentences...")
-    for x in range(0, len(sentences)):
-        sentence = pre_process_sentence(sentences[x])
+    result = None
+    if error_queue.empty():
+        source.content = ultimate_text
+        session.add(source)
+    else:
+        result = error_queue.get()
+        session.delete(source)
 
-        stems = nlp.stem_sentence(sentence)
-        rhyme_sound = nlp.rhyme_sound(sentence)
-        syllables = nlp.count_syllables(sentence)
-        alliteration = nlp.has_alliteration(sentence)
+    session.commit()
+    session.close()
 
-        phrase = Phrase(stems=stems, raw=sentence, alliteration=alliteration,
-                        rhyme_sound=rhyme_sound,
-                        syllables=syllables, line_no=x, source=source)
-
-        session.add(phrase)
-
-    log.debug("done processing text; changes not yet committed")
+    return result

@@ -87,35 +87,6 @@ def stem_sentence(sentence):
     stemmed = map(stem_word, words(sentence))
     return list(stemmed)
 
-is_divider = lambda tu: DIVIDER_TAG == second(tu)
-
-def split_multiclause(sentence, tagged_sentence):
-    # extract the text the divider tag represents
-    divider = first(find_first(is_divider, tagged_sentence))
-    if divider is not None:
-        first_clause = sentence[0:sentence.index(divider)].rstrip()
-        second_clause = sentence[sentence.index(divider)+1:].lstrip()
-        return [first_clause, second_clause]
-    else:
-        return [sentence]
-
-def expand_multiclauses(sentences):
-    # TODO consider itertools
-    split = []
-    for sentence in sentences:
-        tagged_sentence = tag(sentence)
-        if not is_empty(tagged_sentence):
-            split += split_multiclause(sentence, tagged_sentence)
-    return split
-
-# TODO Ideally we'd store the original sentence along with the tagged version,
-# but that gets slightly hard with multiclause expansion.
-punctuation_regex = re.compile("^[^a-zA-Z0-9]")
-
-@lru_cache(maxsize=256)
-def match_punctuation(string):
-    return match(punctuation_regex, string)
-
 def count_syllables_in_word(word):
     phonemes = word_to_phonemes(word)
     if phonemes:

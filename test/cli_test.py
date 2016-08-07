@@ -43,6 +43,7 @@ def prosaic(*args) -> Result:
     """Helper function for running prosaic.main, mimicking use from the command
     line. Sets argv to be ['prosaic'] + whatever is passed as args. Returns the
     exit code prosaic would have returned."""
+    # TODO pass an argv to main; leave sys alone
     sys.argv = ['prosaic'] + list(args) + ['--home', TEST_PROSAIC_HOME]
     buff = io.StringIO()
     code = None
@@ -163,7 +164,6 @@ class TestSourceCommands:
         assert source.description == ''
         assert len(source.content) > 400
         assert len(source.phrases) > 100
-        pass
 
     def test_ls(self, db, cleanup):
         source_names = ['blarf', 'flarf', 'narf']
