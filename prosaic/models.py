@@ -17,6 +17,7 @@ from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.engine import Engine
 from sqlalchemy.dialects.postgresql import ARRAY, TEXT, INTEGER
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.pool import NullPool
 
 
 class Database(dict):
@@ -44,8 +45,8 @@ class Database(dict):
         return self._fmt()
 
 def get_engine(db: Database) -> Engine:
-    return create_engine('postgresql://{user}:{password}@{host}:{port}/{dbname}'\
-           .format(**db))
+    dbiapi = 'postgresql://{user}:{password}@{host}:{port}/{dbname}'.format(**db)
+    return create_engine(dbiapi, poolclass=NullPool)
 
 Session = sessionmaker()
 
