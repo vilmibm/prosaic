@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from multiprocessing import Process, Queue
-from io import TextIOBase
+from io import IOBase
 import logging
 import re
 from typing import Optional
@@ -87,10 +87,19 @@ def line_handler(db: Database,
 
     session.commit()
 
+def peek(stream: IOBase, chunk_size: int) -> str:
+    if hasattr(stream, 'peek'):
+        return stream.peek(chunk_size)
+    else:
+        current_pos = stream.tell()
+        result = stream.read(chunk_size)
+        stream.seek(current_pos)
+        return result
+
 
 def process_text(db: Database,
                  source: Source,
-                 text: TextIOBase) -> Optional[Exception]:
+                 text: IOBase) -> Optional[Exception]:
     session = get_session(db)
     line_no = 1 # lol
     ultimate_text = ''
@@ -132,7 +141,7 @@ def process_text(db: Database,
                 continue
             if c == "'" and line_buff.endswith(' '):
                 continue
-            if c == "'" and text.peek(1) == ' ':
+            if c == "'" and peek(text, 1) == ' ':
                 continue
             line_buff += c
         chunk = text.read(CHUNK_SIZE)
