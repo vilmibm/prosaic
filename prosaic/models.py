@@ -12,7 +12,6 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from functools import lru_cache
 from sqlalchemy import create_engine, Column, Boolean, ForeignKey, Table
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.engine import Engine
@@ -44,7 +43,6 @@ class Database(dict):
     def __repr__(self):
         return self._fmt()
 
-@lru_cache(maxsize=128)
 def get_engine(db: Database) -> Engine:
     return create_engine('postgresql://{user}:{password}@{host}:{port}/{dbname}'\
            .format(**db))
