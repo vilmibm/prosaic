@@ -34,15 +34,15 @@ BAD_CHARS = {'(': True,
              '[': True,
              ']': True,
              '`': True,
-             "'": True,
              '"': True,
              '\n': True,
              '“': True,
              '”': True,
              '«': True,
              '»': True,
-             "'": True,
              '\\': True,
+             '=': True,
+             '#': True,
              '_': True,}
 CLAUSE_MARKERS = {',':True, ';':True, ':':True}
 SENTENCE_MARKERS = {'?':True, '.':True, '!':True}
@@ -86,9 +86,9 @@ def line_handler(db: Database,
     session.commit()
 
 
-def process_text_stream(db: Database,
-                        source: Source,
-                        text: TextIOBase) -> Optional[Exception]:
+def process_text(db: Database,
+                 source: Source,
+                 text: TextIOBase) -> Optional[Exception]:
     session = get_session(db)
     line_no = 1 # lol
     ultimate_text = ''
@@ -107,7 +107,7 @@ def process_text_stream(db: Database,
         line_buff = ""
         for c in chunk:
             if BAD_CHARS.get(c, False):
-                if not line_buff.endswith(" "):
+                if not line_buff.endswith(' '):
                     line_buff += ' '
                 continue
             if CLAUSE_MARKERS.get(c, False):
@@ -126,19 +126,31 @@ def process_text_stream(db: Database,
                     line_no += 1
                 line_buff = ""
                 continue
+            if c == ' ' and line_buff.endswith(' '):
+                continue
+            if c == "'" and line_buff.endswith(' '):
+                continue
+            if c == "'" and text.peek(1) == ' ':
+                continue
             line_buff += c
         chunk = text.read(CHUNK_SIZE)
 
     line_queue.put(DONE_READING)
     db_proc.join()
 
-    result = None
+    error = None
     if error_queue.empty():
         source.content = ultimate_text
         session.add(source)
     else:
-        result = error_queue.get()
+        error = error_queue.get()
         session.delete(source)
+
+    result = None
+    if error is None:
+        result = source.id
+    else:
+        result = error
 
     session.commit()
     session.close()

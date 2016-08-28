@@ -24,7 +24,7 @@ import sys
 from sqlalchemy import text
 
 from prosaic.models import Source, Corpus, get_session, get_engine, Database
-from prosaic.parsing import process_text_stream
+from prosaic.parsing import process_text
 from prosaic.generation import poem_from_template
 import prosaic.cfg as cfg
 from prosaic.util import slurp, first
@@ -197,7 +197,7 @@ class ProsaicArgParser(ArgumentParser):
         description = self.args.source_description
         source = Source(name=name, description=description)
 
-        error = process_text_stream(self.db, source, text_file)
+        error = process_text(self.db, source, text_file)
         if error is not None:
             print('There was an error extracting phrases:')
             print('********')
