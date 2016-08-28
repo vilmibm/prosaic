@@ -50,18 +50,18 @@ is also a [cli reference](doc/cli.md).
 This is a little complex right now; I'm working on a simplier API.
 
 ```python
+from io import StringIO
 from prosaic.cfg import DEFAULT_DB
 from prosaic.models import Database, Source, Corpus, get_session
 from prosaic.parsing import process_text
 from prosaic.generate import poem_from_template
 
 db = Database(**DEFAULT_DB)
-session = get_session(db)
 
 source = Source(name='some_name')
-session.add(source)
-process_text(source, 'some very long string of text')
+process_text(db, source, StringIO('some very long string of text')
 
+session = get_session(db)
 corpus = Corpus(name='sweet corpus', sources=[source])
 session.add(corpus)
 session.commit()
@@ -155,6 +155,14 @@ py.test
 ```
 
 ## changelog
+
+ * 6.0.0
+
+  * I guess I forgot to change-log 5.x, oops
+  * process_text now takes a read()able thing instead of a string and a database
+    config object as first param
+  * parsing is faster but at the expense of less precision
+  * slightly saner DB engine handling
 
  * 4.0.0
 
