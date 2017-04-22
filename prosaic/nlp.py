@@ -23,16 +23,20 @@ from prosaic.util import match, invert, first, compose, second, some, is_empty, 
 # We have to pause our imports, here, to do some NLTK prep. We can't import
 # certain things until we've downloaded raw corpora and other data, so we do so
 # here:
-NLTK_DATA_PATH = join(expanduser('~'), 'nltk_data')
+SYSTEM_NLTK_DATA_PATH = '/usr/share/nltk_data'
+USER_NLTK_DATA_PATH = join(expanduser('~'), 'nltk_data')
 NLTK_DATA = ['punkt',
              'maxent_ne_chunker',
              'cmudict',
              'words',
              'maxent_treebank_pos_tagger',]
 
-if not exists(NLTK_DATA_PATH):
-    for datum in NLTK_DATA:
-        nltk.download(datum)
+if not exists(SYSTEM_NLTK_DATA_PATH):
+    if not exists(USER_NLTK_DATA_PATH):
+        for datum in NLTK_DATA:
+            nltk.download(datum)
+# else, it's assumed an admin installed stuff to the system path.
+
 
 from nltk.stem.snowball import EnglishStemmer
 import nltk.chunk as chunk
