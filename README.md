@@ -9,7 +9,7 @@
 
 being a prose scraper & cut-up poetry generator
 
-by [nathanielksmith](http://chiptheglasses.com)
+by [nathanielksmith](https://tilde.town/~vilmibm)
 
 using [nltk](http://nltk.org)
 
@@ -28,26 +28,37 @@ text and rearranging it to form poetic works.
 * linux (it probably works on a mac, i donno)
 * you might need some -dev libraries and/or gcc to get nltk to compile
 
+## database setup
+
+Prosaic requires a postgresql database. Once you've got postgresql installed,
+run the following to create a database prosaic can access (assumes you're on
+linux; refer to google to perform steps like this on osx/windows):
+
+    sudo su postgres
+    createuser prosaic -P
+    # at password prompt, type prosaic and hit enter
+    createdb prosaic -O prosaic
+
 ## quick start
 
-    $ sudo pip install prosaic
-    $ prosaic source new pride_and_prejudice pandp.txt
-    $ prosaic source new hackers hackers_screenplay.txt
-    $ prosaic corpus new pride_and_hackers
-    $ prosaic corpus link pride_and_hackers pride_and_prejudice
-    $ prosaic corpus link pride_and_hackers hackers
-    $ prosaic poem new -thaiku
+    sudo pip install prosaic
+    prosaic source new pride_and_prejudice pandp.txt
+    prosaic source new hackers hackers_screenplay.txt
+    prosaic corpus new pride_and_hackers
+    prosaic corpus link pride_and_hackers pride_and_prejudice
+    prosaic corpus link pride_and_hackers hackers
+    prosaic poem new -thaiku
 
-      and so I warn you.
-      We will know where we have gone
-      ALL: HACK THE PLANET
+    and so I warn you.
+    We will know where we have gone
+    ALL: HACK THE PLANET
 
 See the [full tutorial](doc/tutorial.md) for more detailed instruction. There
 is also a [cli reference](doc/cli.md).
 
 ## use as a library
 
-This is a little complex right now; I'm working on a simplier API.
+This is a little complex right now; I'm working on a simpler API.
 
 ```python
 from io import StringIO
@@ -155,6 +166,14 @@ py.test
 ```
 
 ## changelog
+
+ * 6.1.0
+
+  * default to a system-wide nltk\_data directory; won't download and install to
+    `~` if found. the path is `/usr/share/nltk_data`. this is probably only
+    useful on systems where prosaic is installed globally for multiple users
+    (like on [tilde.town](https://tilde.town)).
+  * not tied to a release, but the readme has database setup instructions now.
 
  * 6.0.0
 
