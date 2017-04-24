@@ -47,7 +47,7 @@ linux; refer to google to perform steps like this on osx/windows):
     prosaic corpus new pride_and_hackers
     prosaic corpus link pride_and_hackers pride_and_prejudice
     prosaic corpus link pride_and_hackers hackers
-    prosaic poem new -thaiku
+    prosaic poem new -cpride_and_hackers -thaiku
 
     and so I warn you.
     We will know where we have gone
