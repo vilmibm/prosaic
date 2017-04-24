@@ -197,11 +197,11 @@ class ProsaicArgParser(ArgumentParser):
         description = self.args.source_description
         source = Source(name=name, description=description)
 
-        error = process_text(self.db, source, text_file)
-        if error is not None:
+        result = process_text(self.db, source, text_file)
+        if type(result) != int:
             print('There was an error extracting phrases:')
             print('********')
-            print(error)
+            print(result)
             print('********')
             print("The source '{}' was not saved.".format(name))
 
