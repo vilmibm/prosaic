@@ -167,6 +167,10 @@ py.test
 
 ## changelog
 
+ * 6.1.1
+
+  * fix error handling; this was preventing sources from being made.
+
  * 6.1.0
 
   * default to a system-wide nltk\_data directory; won't download and install to
