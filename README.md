@@ -70,7 +70,7 @@ from prosaic.generate import poem_from_template
 db = Database(**DEFAULT_DB)
 
 source = Source(name='some_name')
-process_text(db, source, StringIO('some very long string of text')
+process_text(db, source, StringIO('some very long string of text'))
 
 session = get_session(db)
 corpus = Corpus(name='sweet corpus', sources=[source])
