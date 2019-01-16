@@ -20,7 +20,7 @@ setup(
                         'numpy==1.9.0',
                         'SQLAlchemy==1.0.12',
                         'pyhocon==0.3.29',
-                        'psycopg2==2.7.6.1',],
+                        'psycopg2-binary==2.7.6.1',],
     include_package_data = True,
     entry_points = {
           'console_scripts': [
