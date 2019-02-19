@@ -180,7 +180,7 @@ py.test
     config object as first param
   * parsing is faster but at the expense of less precision
   * slightly saner DB engine handling
- * 4.0.0
+* 4.0.0
   * Port to postgresql + sqlalchemy
   * Completely rewrite command line interface
   * Add a --verbose flag and muzzle the logging that used to happen
@@ -189,18 +189,18 @@ py.test
     specifying database connections and default template
   * Rename some modules
   * Remove some vestigial features
- * 3.5.4 - update nltk dependence so prosaic works on python 3.5
- * 3.5.3 - mysterious release i don't know
- * 3.5.2 - handle weird double escaping issues
- * 3.5.1 - fix stupid typo
- * 3.5.0 - prosaic now respects environment variables PROSAIC\_DBNAME, PROSAIC\_DBPORT and PROSAIC\_DBHOST. These are used if not overriden from the command line. If neither environment variables nor CLI args are provided, static defaults are used (these are unchanged).
- * 3.4.0 - flurry of improvements to text pre-processing which makes output much cleaner.
- * 3.3.0 - blank rule; can now add blank lines to output for marking stanzas.
- * 3.2.0 - alliteration support!
- * 3.1.0 - can now install prosaic as a command line tool!! also docs!
- * 3.0.0 - lateral port to python (sorry [hy](http://hylang.org)), but there are some breaking naming changes.
- * 2.0.0 - shiny new CLI UI. run `hy __init__.hy -h` to see/explore the subcommands.
- * 1.0.0 - it works
+* 3.5.4 - update nltk dependence so prosaic works on python 3.5
+* 3.5.3 - mysterious release i don't know
+* 3.5.2 - handle weird double escaping issues
+* 3.5.1 - fix stupid typo
+* 3.5.0 - prosaic now respects environment variables PROSAIC\_DBNAME, PROSAIC\_DBPORT and PROSAIC\_DBHOST. These are used if not overriden from the command line. If neither environment variables nor CLI args are provided, static defaults are used (these are unchanged).
+* 3.4.0 - flurry of improvements to text pre-processing which makes output much cleaner.
+* 3.3.0 - blank rule; can now add blank lines to output for marking stanzas.
+* 3.2.0 - alliteration support!
+* 3.1.0 - can now install prosaic as a command line tool!! also docs!
+* 3.0.0 - lateral port to python (sorry [hy](http://hylang.org)), but there are some breaking naming changes.
+* 2.0.0 - shiny new CLI UI. run `hy __init__.hy -h` to see/explore the subcommands.
+* 1.0.0 - it works
 
 ## further reading
 
