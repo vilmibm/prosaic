@@ -166,28 +166,21 @@ py.test
 
 ## changelog
 
- * 6.1.1
-
+* 6.1.1
   * fix error handling; this was preventing sources from being made.
-
- * 6.1.0
-
+* 6.1.0
   * default to a system-wide nltk\_data directory; won't download and install to
     `~` if found. the path is `/usr/share/nltk_data`. this is probably only
     useful on systems where prosaic is installed globally for multiple users
     (like on [tilde.town](https://tilde.town)).
   * not tied to a release, but the readme has database setup instructions now.
-
- * 6.0.0
-
+* 6.0.0
   * I guess I forgot to change-log 5.x, oops
   * process_text now takes a read()able thing instead of a string and a database
     config object as first param
   * parsing is faster but at the expense of less precision
   * slightly saner DB engine handling
-
  * 4.0.0
-
   * Port to postgresql + sqlalchemy
   * Completely rewrite command line interface
   * Add a --verbose flag and muzzle the logging that used to happen
@@ -196,7 +189,6 @@ py.test
     specifying database connections and default template
   * Rename some modules
   * Remove some vestigial features
-
  * 3.5.4 - update nltk dependence so prosaic works on python 3.5
  * 3.5.3 - mysterious release i don't know
  * 3.5.2 - handle weird double escaping issues
