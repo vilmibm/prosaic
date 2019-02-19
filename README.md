@@ -9,7 +9,7 @@
 
 being a prose scraper & cut-up poetry generator
 
-by [nathanielksmith](https://tilde.town/~vilmibm)
+by [vilmibm](https://tilde.town/~vilmibm)
 
 using [nltk](http://nltk.org)
 
