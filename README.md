@@ -89,8 +89,7 @@ for line in poem_lines:
 
 ## use on the web
 
-there is an *extremely alpha* web wrapper (currently being re-written) at
-[prosaic.party](https://prosaic.party).
+there was a web wrapper at [prosaic.party](https://prosaic.party) but it had some functionality and performance issues and I've taken it down for now.
 
 ## write a template
 
