@@ -16,11 +16,11 @@ setup(
     ],
     keywords='poetry',
     packages=['prosaic'],
-    install_requires = ['nltk==3.4.5',
-                        'numpy==1.9.0',
-                        'SQLAlchemy==1.0.12',
+    install_requires = ['nltk==3.8.1',
+                        'numpy==1.24.0',
+                        'SQLAlchemy==1.4.46',
                         'pyhocon==0.3.29',
-                        'psycopg2-binary==2.7.6.1',],
+                        'psycopg2-binary==2.9.5',],
     include_package_data = True,
     entry_points = {
           'console_scripts': [
