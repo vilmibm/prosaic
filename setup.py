@@ -16,7 +16,7 @@ setup(
     ],
     keywords='poetry',
     packages=['prosaic'],
-    install_requires = ['nltk==3.8.1',
+    install_requires = ['nltk==3.6.6',
                         'numpy==1.24.0',
                         'SQLAlchemy==1.4.46',
                         'pyhocon==0.3.29',
