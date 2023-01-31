@@ -264,6 +264,8 @@ class ProsaicArgParser(ArgumentParser):
 
 def initialize_arg_parser():
     parser = ProsaicArgParser()
+    parser.set_defaults(func=lambda: parser.print_help())
+
     subparsers = parser.add_subparsers()
 
     corpus_parser = subparsers.add_parser('corpus')
