@@ -47,9 +47,7 @@ impl Analyzer {
     }
 }
 
-// TODO stemming
 // TODO syllable count
-// TODO phonemes
 // TODO research advancements in programmatic scansion
 // TODO decide if i want the bad character filtering
 //      from parsing.py: '\n', '|', '/', '\\', '#', '_'
@@ -58,8 +56,7 @@ impl Analyzer {
 
 fn main() {
     // TODO raw mode that just prints phrases and not jsonl
-    // TODO consider just putting this in a string and using contains or using a hashset but this
-    // is already dumb fast
+    // TODO consider using a hashset
     let phrase_markers = [
         ';', ',', ':', '.', '?', '!', '(', ')', '"', '{', '}', '[', ']',
         '“', '”', '=', '`',
