@@ -3,6 +3,15 @@
 version = 3
 
 [[package]]
+name = "cmudict-fast"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c9f73004e928ed46c3e7fd7406d2b12c8674153295f08af084b49860276dc02"
+dependencies = [
+ "thiserror",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12,6 +21,7 @@ checksum = "b1a46d1a171d865aa5f83f92695765caa047a9b4cbae2cbf37dbd613a793fd4c"
 name = "phraser"
 version = "0.1.0"
 dependencies = [
+ "cmudict-fast",
  "serde_json",
 ]
 
@@ -79,6 +89,26 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "thiserror"
+version = "1.0.56"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d54378c645627613241d077a3a79db965db602882668f9136ac42af9ecb730ad"
+dependencies = [
+ "thiserror-impl",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "1.0.56"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fa0faa943b50f3db30a20aa7e265dbc66076993efed8463e8de414e5d06d3471"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
