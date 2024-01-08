@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 serde_json = "1.0"
 cmudict-fast = "0.8"
+rust-stemmers = "1.2.0"
