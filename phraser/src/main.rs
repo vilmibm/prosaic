@@ -57,11 +57,9 @@ impl Analyzer {
 }
 
 // TODO syllable count
-// TODO research advancements in programmatic scansion
 // TODO decide if i want the bad character filtering
 //      from parsing.py: '\n', '|', '/', '\\', '#', '_'
 // TODO see if i want \n detection; right now those are lost
-// TODO include cmudict copyright notice somewhere (Copyright (c) 2015, Alexander Rudnicky)
 
 fn main() {
     let args = PhraserArgs::parse();
@@ -69,7 +67,7 @@ fn main() {
         Some(n) => n,
         None => String::from(""),
     };
-    // TODO no flags: just print raw phrases
+
     if args.json && source_name == "" {
         eprintln!("--name required when --json");
         process::exit(1)
