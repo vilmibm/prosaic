@@ -1,6 +1,7 @@
 use std::io;
-use std::env;
 use std::process;
+
+use clap::Parser;
 
 use cmudict_fast::Cmudict;
 use std::str::FromStr;
@@ -11,6 +12,14 @@ struct Analyzer {
     cmudict: Cmudict,
     stemmer: Stemmer,
     source_name: String,
+}
+
+#[derive(Parser)]
+struct PhraserArgs {
+    #[arg(long)]
+    json: bool,
+    #[arg(long)]
+    name: Option<String>,
 }
 
 impl Analyzer {
@@ -55,20 +64,24 @@ impl Analyzer {
 // TODO include cmudict copyright notice somewhere (Copyright (c) 2015, Alexander Rudnicky)
 
 fn main() {
-    // TODO raw mode that just prints phrases and not jsonl
+    let args = PhraserArgs::parse();
+    let source_name = match args.name {
+        Some(n) => n,
+        None => String::from(""),
+    };
+    // TODO no flags: just print raw phrases
+    if args.json && source_name == "" {
+        eprintln!("--name required when --json");
+        process::exit(1)
+    }
+
     // TODO consider using a hashset
     let phrase_markers = [
         ';', ',', ':', '.', '?', '!', '(', ')', '"', '{', '}', '[', ']',
         '“', '”', '=', '`',
     ];
-    let args: Vec<String> = env::args().collect();
 
-    if args.len() != 2 {
-        eprintln!("need exactly one argument, a source name (got {})", args.len());
-        process::exit(1);
-    }
-
-    let source_name = &args[1];
+    // TODO avoid this setup if in raw mode
     let cmudict_raw = include_str!("cmudict.dict");
     let cmudict = Cmudict::from_str(cmudict_raw).unwrap();
     let stemmer = Stemmer::create(Algorithm::English);
@@ -87,7 +100,11 @@ fn main() {
         for c in line.unwrap().chars() {
             if phrase_markers.iter().any(|ch| *ch == c) {
                 if phrase_buff.len() >= 20 && phrase_buff.contains(' ') {
-                    println!("{}", a.to_jsonl(phrase_buff))
+                    if args.json {
+                        println!("{}", a.to_jsonl(phrase_buff))
+                    } else {
+                        println!("{}", phrase_buff.trim());
+                    }
                 }
                 phrase_buff = String::from("");
             } else {
