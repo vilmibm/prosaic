@@ -213,3 +213,7 @@ py.test
 * [Lovecraft plaintext corpus](https://github.com/nathanielksmith/lovecraftcorpus). Most of H.P. Lovecraft's bibliography in plain text for cutting up.
 * [Project Gutenberg](http://www.gutenberg.org/). Lots and lots of public domain books in plaintext.
 
+
+## Copyright notices
+
+source code contains a copy of CMUdict pronunciation library copyright (c) 2015, Alexander Rudnicky
