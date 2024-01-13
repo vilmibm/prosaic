@@ -42,15 +42,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     }
 }
 
-// TODO main route to serve index
-    // this has authorship app on it (source selector + line sculptor)
-    // auth only if you want to add your own sources
-// TODO authed GET to see list of saved pieces
-// TODO authed POST to save a piece
-// TODO authed GET source upload form page
-// TODO authed POST endpoint to accept a text for phrasing
-// TODO POST signup
-// TODO GET to trade a secret for a session cookie (from email)
+// TODO try out that routing library
+// TODO serve index
+// TODO first pass on js
+// TODO dummy /lines route
+
+// MVP (just gutchunk corpus, phrased)
+// GET index
+// GET /lines/?n=$n
+
+// MVP++
+// GET index
+// GET /sources
+// GET /lines/?n=$n&sources=$s0,$s1,$s2
+
+// MVP+++
+// GET index
+// GET /sources
+// GET /lines/?n=$n&sources=$s0,$s1,$s2
+// POST /signup
+// POST /source
+// GET /auth/?tok=$tok
 
 /* what to do about user state
  *
@@ -61,6 +73,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
  *
  * I think email + sign in links (eg no password) is the way to go with long lived cookie.
  *
- *
+ * Wisest bet is to start with MVP.
  */
 
