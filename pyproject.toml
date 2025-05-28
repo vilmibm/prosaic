@@ -14,6 +14,7 @@ dependencies = [
   "pyhocon==0.3.29",
   "psycopg2-binary==2.9.10",
 ]
+url = "https://github.com/vilmibm/prosaic"
 
 [project.scripts]
 prosaic = "prosaic:main"
