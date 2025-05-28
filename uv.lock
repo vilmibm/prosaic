@@ -1,0 +1,180 @@
+version = 1
+requires-python = ">=3.13"
+
+[[package]]
+name = "click"
+version = "8.2.1"
+source = { registry = "http://nexus.us.archive.org/repository/pypi-group/simple" }
+dependencies = [
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "http://nexus.us.archive.org/repository/pypi-group/packages/click/8.2.1/click-8.2.1.tar.gz", hash = "sha256:27c491cc05d968d271d5a1db13e3b5a184636d9d930f148c50b038f0d0646202" }
+wheels = [
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/click/8.2.1/click-8.2.1-py3-none-any.whl", hash = "sha256:61a3265b914e850b85317d0b3109c7f8cd35a670f963866005d6ef1d5175a12b" },
+]
+
+[[package]]
+name = "colorama"
+version = "0.4.6"
+source = { registry = "http://nexus.us.archive.org/repository/pypi-group/simple" }
+sdist = { url = "http://nexus.us.archive.org/repository/pypi-group/packages/colorama/0.4.6/colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44" }
+wheels = [
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/colorama/0.4.6/colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6" },
+]
+
+[[package]]
+name = "greenlet"
+version = "3.2.2"
+source = { registry = "http://nexus.us.archive.org/repository/pypi-group/simple" }
+sdist = { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2.tar.gz", hash = "sha256:ad053d34421a2debba45aa3cc39acf454acbcd025b3fc1a9f8a0dee237abd485" }
+wheels = [
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313-macosx_11_0_universal2.whl", hash = "sha256:3ab7194ee290302ca15449f601036007873028712e92ca15fc76597a0aeb4c59" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2dc5c43bb65ec3669452af0ab10729e8fdc17f87a1f2ad7ec65d4aaaefabf6bf" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:decb0658ec19e5c1f519faa9a160c0fc85a41a7e6654b3ce1b44b939f8bf1325" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:6fadd183186db360b61cb34e81117a096bff91c072929cd1b529eb20dd46e6c5" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1919cbdc1c53ef739c94cf2985056bcc0838c1f217b57647cbf4578576c63825" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:3885f85b61798f4192d544aac7b25a04ece5fe2704670b4ab73c2d2c14ab740d" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313-musllinux_1_1_aarch64.whl", hash = "sha256:85f3e248507125bf4af607a26fd6cb8578776197bd4b66e35229cdf5acf1dfbf" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313-musllinux_1_1_x86_64.whl", hash = "sha256:1e76106b6fc55fa3d6fe1c527f95ee65e324a13b62e243f77b48317346559708" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313-win_amd64.whl", hash = "sha256:fe46d4f8e94e637634d54477b0cfabcf93c53f29eedcbdeecaf2af32029b4421" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313t-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:ba30e88607fb6990544d84caf3c706c4b48f629e18853fc6a646f82db9629418" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313t-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:055916fafad3e3388d27dd68517478933a97edc2fc54ae79d3bec827de2c64c4" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313t-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:2593283bf81ca37d27d110956b79e8723f9aa50c4bcdc29d3c0543d4743d2763" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:89c69e9a10670eb7a66b8cef6354c24671ba241f46152dd3eed447f79c29fb5b" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313t-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:02a98600899ca1ca5d3a2590974c9e3ec259503b2d6ba6527605fcd74e08e207" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313t-musllinux_1_1_aarch64.whl", hash = "sha256:b50a8c5c162469c3209e5ec92ee4f95c8231b11db6a04db09bbe338176723bb8" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp313-cp313t-musllinux_1_1_x86_64.whl", hash = "sha256:45f9f4853fb4cc46783085261c9ec4706628f3b57de3e68bae03e8f8b3c0de51" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/greenlet/3.2.2/greenlet-3.2.2-cp314-cp314-macosx_11_0_universal2.whl", hash = "sha256:9ea5231428af34226c05f927e16fc7f6fa5e39e3ad3cd24ffa48ba53a47f4240" },
+]
+
+[[package]]
+name = "joblib"
+version = "1.5.1"
+source = { registry = "http://nexus.us.archive.org/repository/pypi-group/simple" }
+sdist = { url = "http://nexus.us.archive.org/repository/pypi-group/packages/joblib/1.5.1/joblib-1.5.1.tar.gz", hash = "sha256:f4f86e351f39fe3d0d32a9f2c3d8af1ee4cec285aafcb27003dda5205576b444" }
+wheels = [
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/joblib/1.5.1/joblib-1.5.1-py3-none-any.whl", hash = "sha256:4719a31f054c7d766948dcd83e9613686b27114f190f717cec7eaa2084f8a74a" },
+]
+
+[[package]]
+name = "nltk"
+version = "3.8.1"
+source = { registry = "http://nexus.us.archive.org/repository/pypi-group/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "joblib" },
+    { name = "regex" },
+    { name = "tqdm" },
+]
+sdist = { url = "http://nexus.us.archive.org/repository/pypi-group/packages/nltk/3.8.1/nltk-3.8.1.zip", hash = "sha256:1834da3d0682cba4f2cede2f9aad6b0fafb6461ba451db0efb6f9c39798d64d3" }
+wheels = [
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/nltk/3.8.1/nltk-3.8.1-py3-none-any.whl", hash = "sha256:fd5c9109f976fa86bcadba8f91e47f5e9293bd034474752e92a520f81c93dda5" },
+]
+
+[[package]]
+name = "numpy"
+version = "1.26.4"
+source = { registry = "http://nexus.us.archive.org/repository/pypi-group/simple" }
+sdist = { url = "http://nexus.us.archive.org/repository/pypi-group/packages/numpy/1.26.4/numpy-1.26.4.tar.gz", hash = "sha256:2a02aba9ed12e4ac4eb3ea9421c420301a0c6460d9830d74a9df87efa4912010" }
+
+[[package]]
+name = "prosaic"
+version = "6.2.0"
+source = { editable = "." }
+dependencies = [
+    { name = "nltk" },
+    { name = "numpy" },
+    { name = "psycopg2-binary" },
+    { name = "pyhocon" },
+    { name = "sqlalchemy" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "nltk", specifier = "==3.8.1" },
+    { name = "numpy", specifier = "==1.26.4" },
+    { name = "psycopg2-binary", specifier = "==2.9.10" },
+    { name = "pyhocon", specifier = "==0.3.29" },
+    { name = "sqlalchemy", specifier = "==1.4.46" },
+]
+
+[[package]]
+name = "psycopg2-binary"
+version = "2.9.10"
+source = { registry = "http://nexus.us.archive.org/repository/pypi-group/simple" }
+sdist = { url = "http://nexus.us.archive.org/repository/pypi-group/packages/psycopg2-binary/2.9.10/psycopg2-binary-2.9.10.tar.gz", hash = "sha256:4b3df0e6990aa98acda57d983942eff13d824135fe2250e6522edaa782a06de2" }
+wheels = [
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/psycopg2-binary/2.9.10/psycopg2_binary-2.9.10-cp313-cp313-macosx_12_0_x86_64.whl", hash = "sha256:26540d4a9a4e2b096f1ff9cce51253d0504dca5a85872c7f7be23be5a53eb18d" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/psycopg2-binary/2.9.10/psycopg2_binary-2.9.10-cp313-cp313-macosx_14_0_arm64.whl", hash = "sha256:e217ce4d37667df0bc1c397fdcd8de5e81018ef305aed9415c3b093faaeb10fb" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/psycopg2-binary/2.9.10/psycopg2_binary-2.9.10-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:245159e7ab20a71d989da00f280ca57da7641fa2cdcf71749c193cea540a74f7" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/psycopg2-binary/2.9.10/psycopg2_binary-2.9.10-cp313-cp313-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3c4ded1a24b20021ebe677b7b08ad10bf09aac197d6943bfe6fec70ac4e4690d" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/psycopg2-binary/2.9.10/psycopg2_binary-2.9.10-cp313-cp313-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:3abb691ff9e57d4a93355f60d4f4c1dd2d68326c968e7db17ea96df3c023ef73" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/psycopg2-binary/2.9.10/psycopg2_binary-2.9.10-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8608c078134f0b3cbd9f89b34bd60a943b23fd33cc5f065e8d5f840061bd0673" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/psycopg2-binary/2.9.10/psycopg2_binary-2.9.10-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:230eeae2d71594103cd5b93fd29d1ace6420d0b86f4778739cb1a5a32f607d1f" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/psycopg2-binary/2.9.10/psycopg2_binary-2.9.10-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:bb89f0a835bcfc1d42ccd5f41f04870c1b936d8507c6df12b7737febc40f0909" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/psycopg2-binary/2.9.10/psycopg2_binary-2.9.10-cp313-cp313-musllinux_1_2_ppc64le.whl", hash = "sha256:f0c2d907a1e102526dd2986df638343388b94c33860ff3bbe1384130828714b1" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/psycopg2-binary/2.9.10/psycopg2_binary-2.9.10-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:f8157bed2f51db683f31306aa497311b560f2265998122abe1dce6428bd86567" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/psycopg2-binary/2.9.10/psycopg2_binary-2.9.10-cp313-cp313-win_amd64.whl", hash = "sha256:27422aa5f11fbcd9b18da48373eb67081243662f9b46e6fd07c3eb46e4535142" },
+]
+
+[[package]]
+name = "pyhocon"
+version = "0.3.29"
+source = { registry = "http://nexus.us.archive.org/repository/pypi-group/simple" }
+dependencies = [
+    { name = "pyparsing" },
+]
+sdist = { url = "http://nexus.us.archive.org/repository/pypi-group/packages/pyhocon/0.3.29/pyhocon-0.3.29.tar.gz", hash = "sha256:a6a68076d48f41f2302b41b10bc6dd8d7bf45f6648521553627236f3ed06744c" }
+
+[[package]]
+name = "pyparsing"
+version = "3.2.3"
+source = { registry = "http://nexus.us.archive.org/repository/pypi-group/simple" }
+sdist = { url = "http://nexus.us.archive.org/repository/pypi-group/packages/pyparsing/3.2.3/pyparsing-3.2.3.tar.gz", hash = "sha256:b9c13f1ab8b3b542f72e28f634bad4de758ab3ce4546e4301970ad6fa77c38be" }
+wheels = [
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/pyparsing/3.2.3/pyparsing-3.2.3-py3-none-any.whl", hash = "sha256:a749938e02d6fd0b59b356ca504a24982314bb090c383e3cf201c95ef7e2bfcf" },
+]
+
+[[package]]
+name = "regex"
+version = "2024.11.6"
+source = { registry = "http://nexus.us.archive.org/repository/pypi-group/simple" }
+sdist = { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6.tar.gz", hash = "sha256:7ab159b063c52a0333c884e4679f8d7a85112ee3078fe3d9004b2dd875585519" }
+wheels = [
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:a6ba92c0bcdf96cbf43a12c717eae4bc98325ca3730f6b130ffa2e3c3c723d84" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:525eab0b789891ac3be914d36893bdf972d483fe66551f79d3e27146191a37d4" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:086a27a0b4ca227941700e0b31425e7a28ef1ae8e5e05a33826e17e47fbfdba0" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bde01f35767c4a7899b7eb6e823b125a64de314a8ee9791367c9a34d56af18d0" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:b583904576650166b3d920d2bcce13971f6f9e9a396c673187f49811b2769dc7" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:1c4de13f06a0d54fa0d5ab1b7138bfa0d883220965a29616e3ea61b35d5f5fc7" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3cde6e9f2580eb1665965ce9bf17ff4952f34f5b126beb509fee8f4e994f143c" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:0d7f453dca13f40a02b79636a339c5b62b670141e63efd511d3f8f73fba162b3" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:59dfe1ed21aea057a65c6b586afd2a945de04fc7db3de0a6e3ed5397ad491b07" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:b97c1e0bd37c5cd7902e65f410779d39eeda155800b65fc4d04cc432efa9bc6e" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-musllinux_1_2_ppc64le.whl", hash = "sha256:f9d1e379028e0fc2ae3654bac3cbbef81bf3fd571272a42d56c24007979bafb6" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-musllinux_1_2_s390x.whl", hash = "sha256:13291b39131e2d002a7940fb176e120bec5145f3aeb7621be6534e46251912c4" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:4f51f88c126370dcec4908576c5a627220da6c09d0bff31cfa89f2523843316d" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-win32.whl", hash = "sha256:63b13cfd72e9601125027202cad74995ab26921d8cd935c25f09c630436348ff" },
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/regex/2024.11.6/regex-2024.11.6-cp313-cp313-win_amd64.whl", hash = "sha256:2b3361af3198667e99927da8b84c1b010752fa4b1115ee30beaa332cabc3ef1a" },
+]
+
+[[package]]
+name = "sqlalchemy"
+version = "1.4.46"
+source = { registry = "http://nexus.us.archive.org/repository/pypi-group/simple" }
+dependencies = [
+    { name = "greenlet", marker = "platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64'" },
+]
+sdist = { url = "http://nexus.us.archive.org/repository/pypi-group/packages/sqlalchemy/1.4.46/SQLAlchemy-1.4.46.tar.gz", hash = "sha256:6913b8247d8a292ef8315162a51931e2b40ce91681f1b6f18f697045200c4a30" }
+
+[[package]]
+name = "tqdm"
+version = "4.67.1"
+source = { registry = "http://nexus.us.archive.org/repository/pypi-group/simple" }
+dependencies = [
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "http://nexus.us.archive.org/repository/pypi-group/packages/tqdm/4.67.1/tqdm-4.67.1.tar.gz", hash = "sha256:f8aef9c52c08c13a65f30ea34f4e5aac3fd1a34959879d7e59e63027286627f2" }
+wheels = [
+    { url = "http://nexus.us.archive.org/repository/pypi-group/packages/tqdm/4.67.1/tqdm-4.67.1-py3-none-any.whl", hash = "sha256:26445eca388f82e72884e0d580d5464cd801a3ea01e63e5601bdff9ba6a48de2" },
+]
