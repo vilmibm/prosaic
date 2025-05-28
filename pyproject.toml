@@ -24,3 +24,4 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/prosaic"]
+include = ["src/prosaic/templates/*.json"]
